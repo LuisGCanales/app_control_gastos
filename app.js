@@ -697,11 +697,164 @@ function mostrarVistaGraficas() {
   });
 }
 
+// Visualización de resumen por categoría con barras apiladas
+function mostrarVistaResumenBarras() {
+  const conf = cargarLimites();
+  const hoy = getToday();
+  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+  const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
+  const fijosDesdeFormulario = gastos.filter(g => g.fijo && g.timestamp.slice(0, 10) >= getMonthCustom(hoy, conf.inicioMes) && g.timestamp.slice(0, 10) < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes));
+
+  const resumen = {
+    Día: { gasto: 0, limite: conf.dia },
+    Semana: { gasto: 0, limite: conf.semana },
+    Mes: { gasto: 0, limite: conf.mes },
+    TDC: { gasto: 0, limite: conf.tdc },
+    Compartido: { gasto: 0, limite: conf.compartido }
+  };
+
+  gastos.forEach(g => {
+    const fecha = g.timestamp.slice(0, 10);
+    if (!g.fijo && fecha === hoy) resumen.Día.gasto += g.monto;
+    if (!g.fijo && fecha >= getWeekCustom(hoy, conf.inicioSemana) && fecha < sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7))
+      resumen.Semana.gasto += g.monto;
+    if (!g.fijo && fecha >= getMonthCustom(hoy, conf.inicioMes) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes))
+      resumen.Mes.gasto += g.monto;
+    if (g.tdc && fecha >= getMonthCustom(hoy, conf.inicioTDC) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC))
+      resumen.TDC.gasto += g.monto;
+    if (g.compartido && fecha >= getMonthCustom(hoy, conf.inicioMes) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes))
+      resumen.Compartido.gasto += g.monto;
+  });
+
+  // Ajustar disponible mensual descontando fijos
+  const totalFijosMensual = [...fijosPendientes, ...fijosDesdeFormulario].reduce((acc, g) => acc + g.monto, 0);
+  resumen.Mes.limite -= totalFijosMensual;
+
+  const categorias = Object.keys(resumen);
+  const gastado = categorias.map(k => resumen[k].gasto);
+  const disponible = categorias.map(k => resumen[k].limite - resumen[k].gasto);
+  const totales = categorias.map((_, i) => Math.max(resumen[categorias[i]].limite, resumen[categorias[i]].gasto, 1));
+  const normalizar = arr => arr.map((v, i) => Math.max(v, 0) / totales[i]);
+
+  const ctx = document.getElementById("grafica-resumen-barras").getContext("2d");
+  if (window.graficoResumen) window.graficoResumen.destroy();
+ 
+  window.graficoResumen = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: categorias,
+      datasets: [
+        {
+          label: "Gastado",
+          barThickness: 30,
+
+          data: normalizar(gastado),
+          // backgroundColor: "rgba(229,115,115,1)"
+          backgroundColor: "rgba(82, 52, 33, 0.7)"
+        },
+        {
+          label: "Disponible",
+          barThickness: 30,
+          data: normalizar(disponible),
+          // backgroundColor: "rgba(129,199,132,1)"
+          backgroundColor: "rgba(63, 63, 63, 0.7)"
+        }
+      ]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      indexAxis: 'y',
+      responsive: false,
+      scales: {
+        x: {
+          stacked: true,
+          max: 1,
+          ticks: {
+            callback: value => `${(value * 100).toFixed(0)}%`
+          },
+        },
+        y: {
+          stacked: true,
+          ticks: {
+            display: false
+          },
+          grid: {
+            drawTicks: false 
+          }
+        }
+      },
+      plugins: {
+        annotation: {
+          annotations: categorias.map((label, i) => ({
+            type: 'label',
+            content: label,
+            xValue: 0,
+            yValue: i,
+            position: {
+              x: 'start',
+              y: 'center'
+            },
+            font: {
+              size: 12,
+              weight: 'normal'
+            },
+            color: '#bbb',
+            xAdjust: 0,
+            yAdjust: -22
+          }))
+        },
+        datalabels: {
+          display: context => context.dataset.label === "Gastado" || context.dataset.label === "Disponible",
+          color: context => {
+            const label = context.dataset.label;
+            const index = context.dataIndex;
+            const value = label === "Gastado" ? gastado[index] : disponible[index];
+            return value < 0 ? '#FE170D' : '#fff';
+          },
+          font: {
+            size: 13,
+            weight: 'bold'
+          },
+          textStrokeColor: '#000',
+          textStrokeWidth: 0.1,
+          anchor: context => context.dataset.label === "Gastado" ? 'start' : 'end',
+          align: context => context.dataset.label === "Gastado" ? 'end' : 'start',
+          offset: 0,
+          formatter: (value, context) => {
+            const index = context.dataIndex;
+            const realValue = context.dataset.label === "Gastado" ? gastado[index] : disponible[index];
+            return `$${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
+          },
+          clip: false
+        },
+        legend: {
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'rect',
+            color: '#eee'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const index = context.dataIndex;
+              const realValue = context.dataset.label === "Gastado" ? gastado[index] : disponible[index];
+              return `${context.dataset.label}: $${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+
 // === INICIALIZACIÓN ===
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarLimites();
   actualizarResumen();
+  mostrarVistaResumenBarras();
   actualizarSugerencias();
 
   document.getElementById("gasto-form").addEventListener("submit", agregarGasto);

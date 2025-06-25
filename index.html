@@ -56,6 +56,10 @@
     <!-- Tabla resumen -->
     <section id="resumen">
       <h2>Resumen</h2>
+      <!-- Vista de barras apiladas con resumen de gastos  -->
+      <div id="contenedor-resumen-barras" style="margin-top: 2em;">
+        <canvas id="grafica-resumen-barras" height="350"></canvas>
+      </div>
       <table>
         <thead>
           <tr><th>Periodo</th><th>Gasto</th><th>Disponible</th></tr>
@@ -69,6 +73,7 @@
           <tr><td>Compartido</td><td id="total-compartido"></td><td class="disponible" id="disponible-compartido"></td></tr>
         </tbody>
       </table>
+
     </section>
 
     <!-- Acciones -->
@@ -268,6 +273,11 @@
   <!-- Scripts -->
   <script src="app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+  <script>
+    Chart.register(window['chartjs-plugin-annotation']);
+  </script>
   <script>
     // Registro de Service Worker para PWA
     if ('serviceWorker' in navigator) {
