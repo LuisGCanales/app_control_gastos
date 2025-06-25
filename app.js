@@ -740,7 +740,23 @@ function mostrarVistaResumenBarras() {
   const normalizar = arr => arr.map((v, i) => Math.max(v, 0) / totales[i]);
 
   const ctx = document.getElementById("grafica-resumen-barras").getContext("2d");
-  if (window.graficoResumen) window.graficoResumen.destroy();
+  if (window.graficoResumen) {
+    window.graficoResumen.data.labels = categorias;
+    window.graficoResumen.data.datasets[0].data = normalizar(gastado);
+    window.graficoResumen.data.datasets[1].data = normalizar(disponible);
+    window.graficoResumen.options.plugins.datalabels.formatter = crearFormatter(gastado, disponible);
+    window.graficoResumen.update('active');
+    return;
+  } 
+
+  function crearFormatter(gastado, disponible) {
+    return (value, context) => {
+      const index = context.dataIndex;
+      const label = context.dataset.label;
+      const realValue = label === "Gastado" ? gastado[index] : disponible[index];
+      return `$${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
+    };
+  }
  
   window.graficoResumen = new Chart(ctx, {
     type: 'bar',
@@ -786,6 +802,17 @@ function mostrarVistaResumenBarras() {
           }
         }
       },
+      animation: {
+        duration: 3000, 
+        easing: 'easeOutCubic',
+        animateScale: false,
+        animateRotate: false,
+        x: {
+          type: 'number',
+          easing: 'easeOutQuart',
+          from: 500
+        }
+      },
       plugins: {
         annotation: {
           annotations: categorias.map((label, i) => ({
@@ -823,11 +850,7 @@ function mostrarVistaResumenBarras() {
           anchor: context => context.dataset.label === "Gastado" ? 'start' : 'end',
           align: context => context.dataset.label === "Gastado" ? 'end' : 'start',
           offset: 0,
-          formatter: (value, context) => {
-            const index = context.dataIndex;
-            const realValue = context.dataset.label === "Gastado" ? gastado[index] : disponible[index];
-            return `$${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
-          },
+          formatter: crearFormatter(gastado, disponible),
           clip: false
         },
         legend: {
