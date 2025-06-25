@@ -62,10 +62,6 @@
 
     <!-- Acciones -->
     <div style="margin-top: 1em;">
-      <button id="exportar-csv">💾 Exportar CSV</button>
-      <label for="importar-csv" class="importar-label">Importar CSV
-        <input type="file" id="importar-csv" accept="text/*,.csv,.txt" style="display: none;" />
-      </label>
       <button type="button" onclick="mostrarConfiguracion()">⚙️ Configuración</button>
       <button type="button" onclick="mostrarTabla()">Ver todos los gastos</button>
       <button type="button" onclick="mostrarFijosPendientes()">💡 Gastos Fijos Pendientes</button>
@@ -131,6 +127,10 @@
       </div>
       <button id="limpiar-filtros" style="margin-top: 1em;">Limpiar filtros</button>
     </div>
+    <button id="exportar-csv">💾 Exportar CSV</button>
+    <label for="importar-csv" class="importar-label">Importar CSV
+      <input type="file" id="importar-csv" accept="text/*,.csv,.txt" style="display: none;" />
+    </label>
     <button type="button" onclick="mostrarVistaGraficas()">📈 Ver gráficas</button>
     <button type="button" onclick="volverAPrincipal()">Volver</button>
   </section>
