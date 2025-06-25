@@ -53,27 +53,11 @@
       <button type="submit">Agregar Gasto</button>
     </form>
 
-    <!-- Tabla resumen -->
+    <!-- Vista de barras apiladas con resumen de gastos  -->
     <section id="resumen">
-      <h2>Resumen</h2>
-      <!-- Vista de barras apiladas con resumen de gastos  -->
       <div id="contenedor-resumen-barras" style="margin-top: 2em;">
         <canvas id="grafica-resumen-barras" height="350"></canvas>
       </div>
-      <table>
-        <thead>
-          <tr><th>Periodo</th><th>Gasto</th><th>Disponible</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Diario</td><td id="total-dia"></td><td class="disponible" id="disponible-dia"></td></tr>
-          <tr><td>Semanal</td><td id="total-semana"></td><td class="disponible" id="disponible-semana"></td></tr>
-          <tr><td>Mensual</td><td id="total-mes"></td><td class="disponible" id="disponible-mes"></td></tr>
-          <tr class="espaciador"><td colspan="3"></td></tr>
-          <tr><td>TDC</td><td id="total-tdc"></td><td class="disponible" id="disponible-tdc"></td></tr>
-          <tr><td>Compartido</td><td id="total-compartido"></td><td class="disponible" id="disponible-compartido"></td></tr>
-        </tbody>
-      </table>
-
     </section>
 
     <!-- Acciones -->

@@ -160,7 +160,6 @@ function agregarGasto(e) {
   }
 
   document.getElementById("gasto-form").reset();
-  actualizarResumen();
   mostrarVistaResumenBarras();
   actualizarSugerencias();
   volverAPrincipal();
@@ -207,7 +206,6 @@ function importarCSV(e) {
     }).filter(g => g.timestamp);
 
     localStorage.setItem("gastos", JSON.stringify(nuevos));
-    actualizarResumen();
     mostrarVistaResumenBarras();
     renderizarTablaGastos();
   };
@@ -215,63 +213,6 @@ function importarCSV(e) {
 }
 
 // === INTERFAZ DE USUARIO ===
-
-function actualizarResumen() {
-  const gastos = (JSON.parse(localStorage.getItem("gastos")) || []);
-  const conf = cargarLimites();
-  const hoy = getToday();
-
-  const rangos = {
-    dia: [hoy, hoy],
-    semana: [getWeekCustom(hoy, conf.inicioSemana), sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7)],
-    mes: [getMonthCustom(hoy, conf.inicioMes), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes)],
-    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC)]
-  };
-
-  let totales = { dia: 0, semana: 0, mes: 0, compartido: 0, tdc: 0 };
-
-  for (const g of gastos) {
-    const fecha = g.timestamp.slice(0, 10);
-
-    if (!g.fijo && fecha === hoy) totales.dia += g.monto;
-    if (!g.fijo && fecha >= rangos.semana[0] && fecha < rangos.semana[1]) totales.semana += g.monto;
-
-    if (fecha >= rangos.mes[0] && fecha < rangos.mes[1]) {
-      if (!g.fijo) totales.mes += g.monto;
-      if (g.compartido) totales.compartido += g.monto;
-    }
-
-    if (fecha >= rangos.tdc[0] && fecha < rangos.tdc[1] && g.tdc) {
-      totales.tdc += g.monto;
-    }
-  }
-
-  ["dia", "semana", "mes", "compartido", "tdc"].forEach(c => {
-    const total = totales[c];
-    let disponible = conf[c] - total;
-
-    if (c === "mes") {
-      const pendientes = obtenerFijosPendientes()
-        .filter(g => g.estado === "pendiente")
-        .reduce((acc, g) => acc + g.monto, 0);
-
-        // Gastos ingresados como "fijo" en la vista principal
-        const fijosPagadosDesdeFormulario = gastos
-          .filter(g => {
-            const fecha = g.timestamp.slice(0, 10);
-            return g.fijo && fecha >= rangos.mes[0] && fecha < rangos.mes[1];
-          })
-          .reduce((acc, g) => acc + g.monto, 0);
-
-        disponible -= (pendientes + fijosPagadosDesdeFormulario);
-    }
-
-    document.getElementById(`total-${c}`).textContent = formatCurrency(total);
-    const dispEl = document.getElementById(`disponible-${c}`);
-    dispEl.textContent = formatCurrency(disponible);
-    dispEl.classList.toggle("excedido", disponible < 0);
-  });
-}
 
 function actualizarSugerencias() {
   const conceptos = [...new Set((JSON.parse(localStorage.getItem("gastos")) || []).map(g => g.concepto).filter(Boolean))].sort();
@@ -585,7 +526,6 @@ function importarFijosCSV(e) {
 
     guardarFijosPendientes(nuevos);
     renderizarFijosPendientes();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   };
   reader.readAsText(archivo);
@@ -708,6 +648,13 @@ function mostrarVistaResumenBarras() {
   const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
   const fijosDesdeFormulario = gastos.filter(g => g.fijo && g.timestamp.slice(0, 10) >= getMonthCustom(hoy, conf.inicioMes) && g.timestamp.slice(0, 10) < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes));
 
+  const rangos = {
+    dia: [hoy, hoy],
+    semana: [getWeekCustom(hoy, conf.inicioSemana), sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7)],
+    mes: [getMonthCustom(hoy, conf.inicioMes), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes)],
+    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC)]
+  };
+
   const resumen = {
     Día: { gasto: 0, limite: conf.dia },
     Semana: { gasto: 0, limite: conf.semana },
@@ -719,14 +666,14 @@ function mostrarVistaResumenBarras() {
   gastos.forEach(g => {
     const fecha = g.timestamp.slice(0, 10);
     if (!g.fijo && fecha === hoy) resumen.Día.gasto += g.monto;
-    if (!g.fijo && fecha >= getWeekCustom(hoy, conf.inicioSemana) && fecha < sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7))
+    if (!g.fijo && fecha >= rangos.semana[0] && fecha < rangos.semana[1])
       resumen.Semana.gasto += g.monto;
-    if (!g.fijo && fecha >= getMonthCustom(hoy, conf.inicioMes) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes))
-      resumen.Mes.gasto += g.monto;
-    if (g.tdc && fecha >= getMonthCustom(hoy, conf.inicioTDC) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC))
+    if (fecha >= rangos.mes[0] && fecha < rangos.mes[1]) {
+      if (!g.fijo) resumen.Mes.gasto += g.monto;
+      if (g.compartido) resumen.Compartido.gasto += g.monto;
+    }
+    if (g.tdc && fecha >= rangos.tdc[0] && fecha < rangos.tdc[1])
       resumen.TDC.gasto += g.monto;
-    if (g.compartido && fecha >= getMonthCustom(hoy, conf.inicioMes) && fecha < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes))
-      resumen.Compartido.gasto += g.monto;
   });
 
   // Ajustar disponible mensual descontando fijos
@@ -873,7 +820,6 @@ function mostrarVistaResumenBarras() {
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarLimites();
-  actualizarResumen();
   mostrarVistaResumenBarras();
   actualizarSugerencias();
 
@@ -887,7 +833,6 @@ document.addEventListener("DOMContentLoaded", () => {
     limites.inicioTDC = +document.getElementById("inicio-tdc").value;
     localStorage.setItem("limites", JSON.stringify(limites));
     volverAPrincipal();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   });
   document.getElementById("form-fijos-pendientes").addEventListener("submit", e => {
@@ -909,7 +854,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("form-fijos-pendientes").reset();
     renderizarFijosPendientes();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   });
 
@@ -931,7 +875,6 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarFijosPendientes(fijos);
     cerrarFormularioEdicionFijo();
     renderizarFijosPendientes();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   });
 
@@ -946,7 +889,6 @@ document.addEventListener("DOMContentLoaded", () => {
       guardarFijosPendientes(fijos);
       cerrarFormularioEdicionFijo();
       renderizarFijosPendientes();
-      actualizarResumen();
       mostrarVistaResumenBarras();
     }
   });
@@ -984,7 +926,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       localStorage.setItem("gastos", JSON.stringify(todos));
       cerrarFormularioEdicion();
-      actualizarResumen();
       mostrarVistaResumenBarras();
       renderizarTablaGastos();
     }
@@ -1007,7 +948,6 @@ document.addEventListener("DOMContentLoaded", () => {
       todos.splice(idx, 1);
       localStorage.setItem("gastos", JSON.stringify(todos));
       cerrarFormularioEdicion();
-      actualizarResumen();
       mostrarVistaResumenBarras();
       renderizarTablaGastos();
     }
@@ -1024,7 +964,6 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
   guardarFijosPendientes(fijos); // <-- importante: usar la función que guarda
   cerrarModalEdicionFijo();
   renderizarFijosPendientes();
-  actualizarResumen();
   mostrarVistaResumenBarras();
 });
 
@@ -1076,7 +1015,6 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     cerrarModalPagoFijo();
     renderizarFijosPendientes();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   });
 
@@ -1090,7 +1028,6 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     guardarFijosPendientes(fijos);
     cerrarModalEdicionFijo();
     renderizarFijosPendientes();
-    actualizarResumen();
     mostrarVistaResumenBarras();
   });
 
