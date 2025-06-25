@@ -161,6 +161,7 @@ function agregarGasto(e) {
 
   document.getElementById("gasto-form").reset();
   actualizarResumen();
+  mostrarVistaResumenBarras();
   actualizarSugerencias();
   volverAPrincipal();
 }
@@ -207,6 +208,7 @@ function importarCSV(e) {
 
     localStorage.setItem("gastos", JSON.stringify(nuevos));
     actualizarResumen();
+    mostrarVistaResumenBarras();
     renderizarTablaGastos();
   };
   reader.readAsText(archivo);
@@ -584,6 +586,7 @@ function importarFijosCSV(e) {
     guardarFijosPendientes(nuevos);
     renderizarFijosPendientes();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   };
   reader.readAsText(archivo);
   e.target.value = ""; // reinicia el input para permitir mismo archivo
@@ -868,6 +871,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("limites", JSON.stringify(limites));
     volverAPrincipal();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   });
   document.getElementById("form-fijos-pendientes").addEventListener("submit", e => {
     e.preventDefault();
@@ -889,6 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("form-fijos-pendientes").reset();
     renderizarFijosPendientes();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   });
 
   ["filtro-fijo-pendiente", "filtro-fijo-pagado", "filtro-fijo-pospuesto"].forEach(id => {
@@ -910,6 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cerrarFormularioEdicionFijo();
     renderizarFijosPendientes();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   });
 
   document.getElementById("btn-eliminar-fijo").addEventListener("click", () => {
@@ -924,6 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cerrarFormularioEdicionFijo();
       renderizarFijosPendientes();
       actualizarResumen();
+      mostrarVistaResumenBarras();
     }
   });
 
@@ -961,6 +968,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("gastos", JSON.stringify(todos));
       cerrarFormularioEdicion();
       actualizarResumen();
+      mostrarVistaResumenBarras();
       renderizarTablaGastos();
     }
   });
@@ -983,6 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("gastos", JSON.stringify(todos));
       cerrarFormularioEdicion();
       actualizarResumen();
+      mostrarVistaResumenBarras();
       renderizarTablaGastos();
     }
   });
@@ -999,6 +1008,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
   cerrarModalEdicionFijo();
   renderizarFijosPendientes();
   actualizarResumen();
+  mostrarVistaResumenBarras();
 });
 
   // Pagar gasto fjo
@@ -1050,6 +1060,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     cerrarModalPagoFijo();
     renderizarFijosPendientes();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   });
 
   document.getElementById("btn-reactivar-fijo").addEventListener("click", () => {
@@ -1063,6 +1074,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     cerrarModalEdicionFijo();
     renderizarFijosPendientes();
     actualizarResumen();
+    mostrarVistaResumenBarras();
   });
 
 });
