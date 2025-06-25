@@ -638,7 +638,7 @@ function mostrarVistaGraficas() {
           tension: 0.2,
           pointRadius: 2,
           pointHoverRadius: 5,
-          pointHitRadius: 20        
+          pointHitRadius: 10        
         },
         {
           label: "Promedio acumulativo",
@@ -648,7 +648,7 @@ function mostrarVistaGraficas() {
           tension: 0.2,
           pointRadius: 1.5,
           pointHoverRadius: 5,
-          pointHitRadius: 20,
+          pointHitRadius: 10,
           fill: false
         }
       ]
