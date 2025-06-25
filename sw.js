@@ -21,11 +21,17 @@ self.addEventListener('install', event => {
 
 // Activación y limpieza de caches antiguos
 self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME]; // Mantén el caché de la versión actual
+
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.filter(name => name !== CACHE_NAME)
-                  .map(name => caches.delete(name))
+        cacheNames.map(cacheName => {
+          // Elimina los caches que no estén en la lista blanca
+          if (!cacheWhitelist.includes(cacheName)) {
+            return caches.delete(cacheName);
+          }
+        })
       );
     })
   );
