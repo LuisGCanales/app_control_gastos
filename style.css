@@ -1,0 +1,500 @@
+/* ========================================
+   ESTILO GLOBAL Y FONDO
+======================================== */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: url('./assets/img/fondo.jpg') no-repeat center center fixed;
+  /*background: url('https://th.bing.com/th/id/R.940498637340be7ead338f305370b230?rik=SkOOaJvF2sDG2g&riu=http%3a%2f%2f3.bp.blogspot.com%2f_4zjim1yGdjk%2fTMbl8frJsiI%2fAAAAAAAACgs%2fR8omrbojAZ8%2fw1200-h630-p-k-no-nu%2fScare-Bear-by-Jason-Tracewell.jpg&ehk=LCtwykzAwojPIIkF5kcI8XZZgcLfRQY81PgxC84JEcY%3d') no-repeat center center fixed;*/
+  background-size: cover;
+  color: #e0e0e0;
+}
+
+/* ========================================
+   CONTENEDORES Y TITULOS
+======================================== */
+
+.container {
+  max-width: 400px;
+  margin: 4em auto;
+  padding: 2em;
+  background-color: rgba(15, 15, 15, 0.75);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 1em;
+  color: #f0f0f0;
+}
+
+/* ========================================
+   FORMULARIOS E INPUTS
+======================================== */
+
+form label {
+  display: block;
+  margin-top: 1em;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+input[type="number"],
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.6em;
+  margin-top: 0.3em;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2f2f2;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+input::placeholder {
+  color: #bbb;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+input:focus,
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4C301F;
+}
+
+/* ========================================
+   BOTONES
+======================================== */
+
+button {
+  width: 100%;
+  background-color: #4C301F;
+  color: #f5f5f5;
+  border: none;
+  padding: 0.75em;
+  margin-top: 1.3em;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #392012;
+}
+
+/* ========================================
+   TABLA RESUMEN
+======================================== */
+
+#resumen table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.2em;
+  font-size: 0.95em;
+}
+
+#resumen th,
+#resumen td {
+  padding: 0.6em;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+#resumen th {
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  color: #ddd;
+}
+
+#resumen td {
+  color: #ddd;
+}
+
+td.disponible {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+td.disponible.excedido {
+  color: #ff8080 !important;
+  font-weight: bold;
+}
+
+#resumen tr.espaciador td {
+  padding: 0;
+  border: none;
+  height: 3em;
+  background: transparent;
+}
+
+/* ========================================
+   TABLA DE GASTOS
+======================================== */
+
+#tabla-gastos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  font-size: 0.9em;
+  color: #f5f5f5;
+}
+
+#tabla-gastos th,
+#tabla-gastos td {
+  padding: 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+}
+
+#tabla-gastos th {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#tabla-gastos td.reintegro {
+  color: #80d4aa;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* Separador de días en tabla */
+.separador-dia {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ccc;
+  font-size: 0.9em;
+  text-align: left;
+}
+
+/* Icono editar */
+.btn-editar {
+  display: inline-block;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.btn-editar:hover {
+  opacity: 0.9;
+}
+
+.btn-editar svg {
+  vertical-align: middle;
+  stroke: #ddd;
+  transition: stroke 0.2s ease;
+}
+
+.btn-editar:hover svg {
+  stroke: #fff;
+}
+
+/* ========================================
+   SWITCHES / CHECKBOXES
+======================================== */
+
+.switches {
+  display: flex;
+  justify-content: space-around;
+  margin: 1em 0;
+}
+
+.checkbox-wrapper-17 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.checkbox-wrapper-17 input[type=checkbox] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.checkbox-wrapper-17 label {
+  --size: 40px;
+  cursor: pointer;
+  width: var(--size);
+  height: calc(var(--size) / 2);
+  background: grey;
+  display: block;
+  border-radius: 100px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.checkbox-wrapper-17 label:after {
+  content: '';
+  position: absolute;
+  top: 6%;
+  left: 2.5%;
+  width: calc(50% - 5%);
+  height: calc(100% - 11%);
+  background: #fff;
+  border-radius: 90px;
+  transition: 0.3s;
+}
+
+.checkbox-wrapper-17 input:checked + label {
+  background: #49362A;
+}
+
+.checkbox-wrapper-17 input:checked + label:after {
+  left: calc(100% - 2.5%);
+  transform: translateX(-100%);
+}
+
+.checkbox-wrapper-17 label:active:after {
+  width: 55%;
+}
+
+.checkbox-wrapper-17 * {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.switch-label {
+  font-size: 0.85em;
+  color: #f0f0f0;
+  text-align: center;
+}
+
+/* Modo minimal para filtros y edición */
+.checkbox-minimal {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background-color: rgba(200, 200, 200, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  border: none;
+  position: relative;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+.checkbox-minimal:checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxes-inline {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  margin: 0.5em 0;
+}
+
+/* ========================================
+   FILTROS DE TABLA
+======================================== */
+
+.switches.filtros-switches {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-top: -1.5em;
+}
+
+.switches-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2em;
+}
+
+/* ========================================
+   ETIQUETAS Y ESTADOS
+======================================== */
+
+.importar-label {
+  display: block;
+  text-align: center;
+  margin-top: 2em;
+  font-weight: 400;
+  cursor: pointer;
+  color: #cccccc;
+}
+
+.custom-fecha-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 0.5em;
+  font-size: 0.7em;
+  font-weight: normal;
+  color: #ccc;
+}
+
+#activar-fecha {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background-color: rgba(200, 200, 200, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  border: 0;
+  position: relative;
+}
+
+#activar-fecha:checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.hidden {
+  display: none;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media screen and (max-width: 480px) {
+  .container {
+    margin: 2em;
+    padding: 1.5em;
+  }
+
+  h1, h2 {
+    font-size: 1.2em;
+  }
+
+  #resumen table {
+    font-size: 0.85em;
+  }
+}
+
+
+#tabla-gastos,
+#tabla-fijos-pendientes {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  font-size: 0.9em;
+  color: #f5f5f5;
+}
+
+#tabla-gastos th, #tabla-gastos td,
+#tabla-fijos-pendientes th, #tabla-fijos-pendientes td {
+  padding: 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+}
+
+#tabla-gastos th, #tabla-fijos-pendientes th {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#tabla-fijos-pendientes th:nth-child(1),
+#tabla-fijos-pendientes td:nth-child(1) {
+  width: 60%;  /* Concepto */
+}
+#tabla-fijos-pendientes th:nth-child(2),
+#tabla-fijos-pendientes td:nth-child(2) {
+  width: 25%;  /* Monto */
+}
+#tabla-fijos-pendientes th:nth-child(3),
+#tabla-fijos-pendientes td:nth-child(3) {
+  width: 10%;  /* Estado */
+}
+#tabla-fijos-pendientes th:nth-child(4),
+#tabla-fijos-pendientes td:nth-child(4) {
+  width: 5%;  /* Botón ✎ */
+}
+
+.estado {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.estado.pendiente {
+  color: #ff8080;
+}
+
+.estado.pagado {
+  color: #80d4aa;
+}
+
+.estado.pospuesto {
+  color: #ffffff;
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.modal-form {
+  max-width: 400px;
+  margin: auto;
+  padding: 1.5em;
+  border-radius: 1em;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.separador-dia-fijos {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ccc;
+  font-size: 1em;
+  line-height: 0.9em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+
+.fila-fijo {
+  line-height: 2.4em;
+  font-weight: bold;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+#vista-graficas canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+}
+
+@media screen and (orientation: landscape) {
+  .container {
+    max-width: 90vw;
+    margin: 2em auto;
+  }
+}
+
+@media screen and (orientation: portrait) {
+  #vista-graficas {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}

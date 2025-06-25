@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Gastos</title>
+
+  <!-- Estilos y configuración -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#4CAF50" />
+</head>
+<body>
+
+  <!-- === Vista Principal === -->
+  <main class="container" id="vista-principal">
+    <h1>Control de Gastos</h1>
+
+    <!-- Formulario de nuevo gasto -->
+    <form id="gasto-form" autocomplete="off">
+      <input type="text" id="concepto" list="sugerencias" placeholder="Concepto" required autocomplete="on" inputmode="text"/>
+      <datalist id="sugerencias"></datalist>
+
+      <input type="number" id="monto" placeholder="Monto" step="0.01" required />
+
+      <!-- Etiquetas TDC / Compartido / Fijo -->
+      <div class="switches">
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="tdc" />
+          <label for="tdc" title="Pago con TDC"></label>
+          <span class="switch-label">TDC</span>
+        </div>
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="compartido" />
+          <label for="compartido" title="Compartido con alguien más"></label>
+          <span class="switch-label">Compartido</span>
+        </div>
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="fijo" />
+          <label for="fijo" title="Gasto fijo mensual"></label>
+          <span class="switch-label">Fijo</span>
+        </div>
+      </div>
+
+      <!-- Activar fecha personalizada -->
+      <label class="custom-fecha-label">
+        <input type="checkbox" id="activar-fecha" />
+        Fecha personalizada
+      </label>
+      <input type="date" id="fecha-personalizada" style="display: none;" />
+
+      <button type="submit">Agregar Gasto</button>
+    </form>
+
+    <!-- Tabla resumen -->
+    <section id="resumen">
+      <h2>Resumen</h2>
+      <table>
+        <thead>
+          <tr><th>Periodo</th><th>Gasto</th><th>Disponible</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Diario</td><td id="total-dia"></td><td class="disponible" id="disponible-dia"></td></tr>
+          <tr><td>Semanal</td><td id="total-semana"></td><td class="disponible" id="disponible-semana"></td></tr>
+          <tr><td>Mensual</td><td id="total-mes"></td><td class="disponible" id="disponible-mes"></td></tr>
+          <tr class="espaciador"><td colspan="3"></td></tr>
+          <tr><td>TDC</td><td id="total-tdc"></td><td class="disponible" id="disponible-tdc"></td></tr>
+          <tr><td>Compartido</td><td id="total-compartido"></td><td class="disponible" id="disponible-compartido"></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Acciones -->
+    <div style="margin-top: 1em;">
+      <button id="exportar-csv">💾 Exportar CSV</button>
+      <label for="importar-csv" class="importar-label">Importar CSV
+        <input type="file" id="importar-csv" accept="text/*,.csv,.txt" style="display: none;" />
+      </label>
+      <button type="button" onclick="mostrarConfiguracion()">⚙️ Configuración</button>
+      <button type="button" onclick="mostrarTabla()">Ver todos los gastos</button>
+      <button type="button" onclick="mostrarFijosPendientes()">💡 Gastos Fijos Pendientes</button>
+    </div>
+  </main>
+
+  <!-- === Vista Configuración === -->
+  <section class="container" id="vista-configuracion" style="display: none;">
+    <h2>Configuración de Límites</h2>
+    <form id="config-form">
+      <label>Límite diario: <input type="number" id="limite-dia" required /></label>
+      <label>Límite semanal: <input type="number" id="limite-semana" required /></label>
+      <label>Límite mensual: <input type="number" id="limite-mes" required /></label>
+      <label>Límite mensual compartido: <input type="number" id="limite-compartido" required /></label>
+      <label>Límite mensual TDC: <input type="number" id="limite-tdc" required /></label>
+      <label>Día inicio de semana (0=D, 1=L...): <input type="number" id="inicio-semana" min="0" max="6" required /></label>
+      <label>Día inicio de mes: <input type="number" id="inicio-mes" min="1" max="31" required /></label>
+      <label>Día inicio corte TDC: <input type="number" id="inicio-tdc" min="1" max="31" required /></label>
+      <button type="submit">Guardar Límites</button>
+    </form>
+    <button type="button" onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+  <!-- === Vista Tabla de Gastos === -->
+  <section class="container" id="vista-tabla" style="display: none;">
+    <h2>Todos los Gastos</h2>
+
+    <table id="tabla-gastos">
+      <thead>
+        <tr><th>Concepto</th><th>Monto</th><th>TDC</th><th>C.</th><th>F.</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>  
+
+    <!-- Filtros -->
+    <div id="filtros-gastos" style="margin-top: 2em;">
+      <label>Filtrar por fecha: <input type="date" id="filtro-fecha" /></label>
+      <div class="switches-group">
+        <div class="switches filtros-switches">
+          <div class="checkbox-wrapper-17">
+            <input type="checkbox" id="filtro-fijos"/>
+            <label for="filtro-fijos" title="Mostrar fijos"></label>
+            <span class="switch-label">Fijos</span>
+          </div>
+          <div class="checkbox-wrapper-17">
+            <input type="checkbox" id="filtro-variables" checked />
+            <label for="filtro-variables" title="Mostrar variables"></label>
+            <span class="switch-label">Variables</span>
+          </div>
+        </div>
+        <div class="switches filtros-switches">
+          <div class="checkbox-wrapper-17">
+            <input type="checkbox" id="filtro-solo-tdc" />
+            <label for="filtro-solo-tdc" title="Solo TDC"></label>
+            <span class="switch-label">Solo TDC</span>
+          </div>
+          <div class="checkbox-wrapper-17">
+            <input type="checkbox" id="filtro-solo-compartido" />
+            <label for="filtro-solo-compartido" title="Solo compartidos"></label>
+            <span class="switch-label">Solo compartido</span>
+          </div>
+        </div>
+      </div>
+      <button id="limpiar-filtros" style="margin-top: 1em;">Limpiar filtros</button>
+    </div>
+    <button type="button" onclick="mostrarVistaGraficas()">📈 Ver gráficas</button>
+    <button type="button" onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+  <!-- === Modal Edición de Gasto === -->
+  <section class="container" id="modal-edicion" style="display: none;">
+    <h2>Editar Gasto</h2>
+    <form id="form-editar">
+      <label>Concepto: <input type="text" id="editar-concepto" required /></label>
+      <label>Monto: <input type="number" id="editar-monto" step="0.01" required /></label>
+      <div class="checkboxes-inline">
+        <label><input type="checkbox" id="editar-tdc" class="checkbox-minimal" />TDC</label>
+        <label><input type="checkbox" id="editar-compartido" class="checkbox-minimal" />Compartido</label>
+        <label><input type="checkbox" id="editar-fijo" class="checkbox-minimal" />Fijo</label>
+      </div>
+      <label>Fecha: <input type="date" id="editar-fecha" required /></label>
+
+      <button type="submit">Guardar cambios</button>
+      <button type="button" id="btn-eliminar-gasto" style="margin-top: 1em; background-color: #802020;">🗑 Eliminar</button>
+      <button type="button" onclick="cerrarFormularioEdicion()">Cancelar</button>
+    </form>
+  </section>
+
+
+  <!-- === Vista de Gastos Fijos Pendientes === -->
+  <section class="container" id="vista-fijos-pendientes" style="display: none;">
+    <h2>Gastos Fijos Pendientes</h2>
+
+    <form id="form-fijos-pendientes">
+      <label>Concepto: <input type="text" id="nuevo-fijo-concepto" required /></label>
+      <label>Monto: <input type="number" id="nuevo-fijo-monto" step="0.01" required /></label>
+      <label>Fecha límite: <input type="date" id="nuevo-fijo-fecha" required /></label>
+      <button type="submit">Agregar</button>
+    </form>
+    <table id="tabla-fijos-pendientes" style="margin-top: 2em;">
+      <thead>
+        <tr><th>Concepto</th><th>Monto</th><th>St.</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="switches filtros-switches" style="margin-top: 1em;">
+      <div class="checkbox-wrapper-17">
+        <input type="checkbox" id="filtro-fijo-pendiente" checked />
+        <label for="filtro-fijo-pendiente" title="Mostrar pendientes"></label>
+        <span class="switch-label">Pendientes</span>
+      </div>
+      <div class="checkbox-wrapper-17">
+        <input type="checkbox" id="filtro-fijo-pagado" checked />
+        <label for="filtro-fijo-pagado" title="Mostrar pagados"></label>
+        <span class="switch-label">Pagados</span>
+      </div>
+      <div class="checkbox-wrapper-17">
+        <input type="checkbox" id="filtro-fijo-pospuesto" checked />
+        <label for="filtro-fijo-pospuesto" title="Mostrar pospuestos"></label>
+        <span class="switch-label">Pospuestos</span>
+      </div>
+    </div>
+  <div class="acciones-secundarias">
+    <button onclick="exportarFijosCSV()">💾 Exportar CSV</button>
+    <label class="importar-label">
+      Importar CSV
+      <input type="file" accept="text/*,.csv,.txt" style="display: none;" onchange="importarFijosCSV(event)" />
+    </label>
+  </div>
+    <button type="button" onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+
+  <!-- Modal de edición de gasto fijo pendiente -->
+  <section class="container" id="modal-edicion-fijo" style="display: none;">
+    <h2>Editar Gasto Fijo</h2>
+    <form id="form-editar-fijo">
+      <label>Concepto: <input type="text" id="editar-fijo-concepto" required /></label>
+      <label>Monto: <input type="number" id="editar-fijo-monto" step="0.01" required /></label>
+      <label>Fecha límite: <input type="date" id="editar-fijo-fecha" required /></label>
+      <button type="submit">Guardar cambios</button>
+      <div style="display: flex; gap: 1em; justify-content: space-between; margin-top: 1em;">
+        <button type="button" id="btn-pagar-fijo" style="background-color: #1c5530;">✅ Pagar</button>
+        <button type="button" id="btn-posponer-fijo" style="background-color: #6e4f1c;">⏳ Posponer</button>
+          <button type="button" id="btn-reactivar-fijo" style="background-color: #3a5c8c; display: none;">🔁 Reactivar</button>
+      </div>
+      <button type="button" id="btn-eliminar-fijo" style="margin-top: 1em; background-color: #802020;">🗑 Eliminar</button>
+      <button type="button" onclick="cerrarFormularioEdicionFijo()">Cancelar</button>
+    </form>
+  </section>
+
+  <section id="modal-pago-fijo" class="modal" style="display: none;">
+    <form id="form-pago-fijo" class="formulario container">
+      <h2>Registrar pago de gasto fijo</h2>
+
+      <label>Concepto:
+        <input type="text" id="pago-fijo-concepto" required />
+      </label>
+
+      <label>Monto:
+        <input type="number" id="pago-fijo-monto" step="0.01" required />
+      </label>
+
+      <div class="checkboxes">
+        <label><input type="checkbox" id="pago-fijo-tdc" class="checkbox-minimal"/> TDC</label>
+        <label><input type="checkbox" id="pago-fijo-compartido" class="checkbox-minimal"/> Compartido</label>
+      </div>
+
+      <label>
+        <input type="checkbox" id="pago-fijo-activar-fecha" class="checkbox-minimal"/> Usar fecha personalizada
+      </label>
+
+      <input type="date" id="pago-fijo-fecha-personalizada" />
+
+      <div class="acciones-modal">
+        <button type="submit">Agregar pago</button>
+        <button type="button" onclick="cerrarModalPagoFijo()">Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Vista de gráficas de gastos variables -->
+  <section class="container" id="vista-graficas" style="display: none;">
+    <h2>Gastos variables diarios</h2>
+    <canvas id="grafica-gastos-diarios" width="600" height="270"></canvas>
+    <button type="button" onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Registro de Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.error('❌ Error al registrar SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>
