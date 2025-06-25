@@ -745,7 +745,7 @@ function mostrarVistaResumenBarras() {
     window.graficoResumen.data.datasets[0].data = normalizar(gastado);
     window.graficoResumen.data.datasets[1].data = normalizar(disponible);
     window.graficoResumen.options.plugins.datalabels.formatter = crearFormatter(gastado, disponible);
-    window.graficoResumen.update('active');
+    window.graficoResumen.update();
     return;
   } 
 
@@ -803,14 +803,14 @@ function mostrarVistaResumenBarras() {
         }
       },
       animation: {
-        duration: 3000, 
+        duration: 1500, 
         easing: 'easeOutCubic',
-        animateScale: false,
-        animateRotate: false,
+        from: undefined,
         x: {
+          duration: 1500,
           type: 'number',
-          easing: 'easeOutQuart',
-          from: 500
+          easing: 'easeOutCubic',
+          from: undefined // 500
         }
       },
       plugins: {
