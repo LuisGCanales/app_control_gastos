@@ -739,7 +739,7 @@ function mostrarVistaResumenBarras() {
   const totales = categorias.map((_, i) => Math.max(resumen[categorias[i]].limite, resumen[categorias[i]].gasto, 1));
   const normalizar = arr => arr.map((v, i) => Math.max(v, 0) / totales[i]);
 
-  const ctx = document.getElementById("grafica-resumen-barras").getContext("2d");
+  const ctx = document.getElementById("grafica-resumen-barras").getContext("2d");  
   if (window.graficoResumen) {
     window.graficoResumen.data.labels = categorias;
     window.graficoResumen.data.datasets[0].data = normalizar(gastado);
@@ -757,7 +757,7 @@ function mostrarVistaResumenBarras() {
       return `$${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
     };
   }
- 
+
   window.graficoResumen = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -861,13 +861,7 @@ function mostrarVistaResumenBarras() {
           }
         },
         tooltip: {
-          callbacks: {
-            label: function (context) {
-              const index = context.dataIndex;
-              const realValue = context.dataset.label === "Gastado" ? gastado[index] : disponible[index];
-              return `${context.dataset.label}: $${realValue.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`;
-            }
-          }
+          enabled: false
         }
       }
     }
