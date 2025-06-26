@@ -498,3 +498,10 @@ td.disponible.excedido {
     justify-content: space-between;
   }
 }
+
+.supscript {
+  font-size: 0.1em;
+  font-weight: normal;
+  vertical-align: sup;
+  margin-left: 0.2em;
+}

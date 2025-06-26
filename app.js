@@ -251,6 +251,7 @@ function mostrarTabla() {
     document.getElementById("filtro-solo-compartido").checked = false;
     renderizarTablaGastos();
   });
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 function renderizarTablaGastos() {
@@ -666,6 +667,7 @@ function mostrarVistaGraficas() {
       }
     }
   });
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 // Visualización de resumen por categoría con barras apiladas
@@ -1063,7 +1065,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     const secciones = document.querySelectorAll("section");
     const visible = Array.from(secciones).find(s => s.style.display !== "none");
 
-    if (visible && visible.id !== "vista-principal") {
+    if (visible && visible.id !== "seccion#resumen") {
       volverAPrincipal(); // o tu función central para regresar
     } else {
       const salir = confirm("¿Deseas salir de la app?");
