@@ -1061,16 +1061,17 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     mostrarVistaResumenBarras();
   });
 
-  window.addEventListener("popstate", (event) => {
-    const secciones = document.querySelectorAll("section");
-    const visible = Array.from(secciones).find(s => s.style.display !== "none");
+  history.replaceState({ vista: "principal" }, "", "#inicio");
 
-    if (visible && visible.id !== "seccion#resumen") {
+  window.addEventListener("popstate", (event) => {
+    const visible = document.querySelector("section:not([style*='display: none'])");
+
+    if (visible && visible.id !== "resumen") {
       volverAPrincipal(); // o tu función central para regresar
     } else {
       const salir = confirm("¿Deseas salir de la app?");
       if (!salir) {
-        history.pushState(null, "", location.pathname); // evita salir
+      history.pushState({ vista: "principal" }, "", "#inicio");
       } else {
         window.close(); // puede no cerrar en algunos navegadores
       }
