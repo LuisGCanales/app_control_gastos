@@ -127,6 +127,12 @@ const volverAPrincipal = () => {
     if (el) el.style.display = "none";
   });
   document.getElementById("vista-principal").style.display = "block";
+  
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock("portrait").catch((err) => {
+      console.log("No se pudo volver a bloquear a portrait:", err);
+    });
+  }
 };
   
 // === OPERACIONES CON GASTOS ===
