@@ -574,13 +574,12 @@ function mostrarVistaGraficas() {
 
   // Establecer dimensiones internas reales para alta resolución
   const dpr = window.devicePixelRatio || 1;
-  console.log(dpr);
   const rect = canvas.getBoundingClientRect();
-  console.log(rect);
   canvas.width = rect.width * dpr;
   canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
 
+  ctx.scale(dpr, dpr);
+  
   window.graficoGastos = new Chart(ctx, {
     type: 'line',
     data: {
@@ -595,8 +594,8 @@ function mostrarVistaGraficas() {
           borderWidth: 1,
           tension: 0.2,
           pointRadius: 2,
-          pointHoverRadius: 5,
-          pointHitRadius: 10        
+          pointHoverRadius: 10,
+          pointHitRadius: 20        
         },
         {
           label: "Promedio acumulativo",
@@ -605,15 +604,14 @@ function mostrarVistaGraficas() {
           borderWidth: 1,
           tension: 0.2,
           pointRadius: 1.5,
-          pointHoverRadius: 5,
-          pointHitRadius: 10,
+          pointHoverRadius: 10,
+          pointHitRadius: 20,
           fill: false
         }
       ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
       plugins: {
         tooltip: {
           usePointStyle: true,
