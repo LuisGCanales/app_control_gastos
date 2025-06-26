@@ -1067,7 +1067,7 @@ history.replaceState({ vista: "principal" }, "", "#inicio");
 window.addEventListener("popstate", () => {
   const visible = document.querySelector("section[style*='display: block']");
 
-  if (!visible) {
+  if (visible) {
     volverAPrincipal(); // regresa a principal
   } else {
     const salir = confirm("¿Deseas salir de la app?");
