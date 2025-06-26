@@ -347,6 +347,7 @@ function abrirFormularioEdicion(gasto) {
   document.getElementById("editar-compartido").checked = gasto.compartido;
   document.getElementById("editar-fijo").checked = gasto.fijo || false;
   document.getElementById("editar-fecha").value = gasto.timestamp.slice(0, 10);
+  history.replaceState({ vista: "principal" }, "", "#inicio");
 }
 
 function cerrarFormularioEdicion() {
@@ -470,7 +471,7 @@ function abrirEdicionFijo(idx) {
     btnReactivar.style.display = "none";
     btnPagar.style.display = "none"; 
   }
-
+  history.replaceState({ vista: "principal" }, "", "#inicio");
 }
 
 function cerrarFormularioEdicionFijo() {
@@ -1061,21 +1062,21 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     mostrarVistaResumenBarras();
   });
 
-  history.replaceState({ vista: "principal" }, "", "#inicio");
+history.replaceState({ vista: "principal" }, "", "#inicio");
 
-  window.addEventListener("popstate", (event) => {
-    const visible = document.querySelector("section:not([style*='display: none'])");
+window.addEventListener("popstate", () => {
+  const visible = document.querySelector("section[style*='display: block']");
 
-    if (visible && visible.id !== "resumen") {
-      volverAPrincipal(); // o tu función central para regresar
-    } else {
-      const salir = confirm("¿Deseas salir de la app?");
-      if (!salir) {
+  if (!visible) {
+    volverAPrincipal(); // regresa a principal
+  } else {
+    const salir = confirm("¿Deseas salir de la app?");
+    if (!salir) {
       history.pushState({ vista: "principal" }, "", "#inicio");
-      } else {
-        window.close(); // puede no cerrar en algunos navegadores
-      }
+    } else {
+      window.close(); // puede no funcionar en todos los navegadores
     }
-  });
+  }
+});
 
 });
