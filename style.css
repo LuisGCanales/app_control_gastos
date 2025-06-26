@@ -485,7 +485,7 @@ td.disponible.excedido {
 
 @media screen and (orientation: landscape) {
   .container {
-    max-width: 70vw;
+    max-width: 80vw;
     margin: 2em auto;
   }
 }
