@@ -138,7 +138,6 @@ const volverAPrincipal = () => {
       console.log("No se pudo volver a bloquear a portrait:", err);
     });
   }
-  history.pushState({ vista: "principal" }, "", "#inicio");
 };
   
 // === OPERACIONES CON GASTOS ===
@@ -1066,21 +1065,26 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     mostrarVistaResumenBarras();
   });
 
-history.pushState({ vista: "principal" }, "", "#inicio");
+  window.addEventListener("popstate", () => {
+    const visible = document.querySelector("section[style*='display: block']");
 
-window.addEventListener("popstate", () => {
-  const visible = document.querySelector("section[style*='display: block']");
+    if (!visible) return;
 
-  if (visible && visible.id !== "resumen") {
-    volverAPrincipal(); // regresa a principal
-  } else {
-    const salir = confirm("¿Deseas salir de la app?");
-    if (!salir) {
-      history.pushState({ vista: "principal" }, "", "#inicio");
-    } else {
-      alert("Puedes cerrar la app desde el botón de retroceso del sistema.");
+    if (visible.id === "modal-edicion") {
+      cerrarFormularioEdicion();
+      return;
     }
-  }
-});
+
+    if (visible.id === "modal-edicion-fijo") {
+      cerrarFormularioEdicionFijo();
+      return;
+    }
+
+    if (visible.id !== "vista-principal") {
+      volverAPrincipal();
+      return;
+    }
+
+  });
 
 });
