@@ -113,12 +113,14 @@ function cargarLimites() {
 const mostrarConfiguracion = () => {
   document.getElementById("vista-principal").style.display = "none";
   document.getElementById("vista-configuracion").style.display = "block";
+  history.pushState({ vista: "otra" }, "", "#otra");
 };
 
 function mostrarFijosPendientes() {
   document.getElementById("vista-principal").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
   renderizarFijosPendientes();
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 const volverAPrincipal = () => {
@@ -133,6 +135,7 @@ const volverAPrincipal = () => {
       console.log("No se pudo volver a bloquear a portrait:", err);
     });
   }
+  history.replaceState(null, "", location.pathname);
 };
   
 // === OPERACIONES CON GASTOS ===
@@ -1054,6 +1057,22 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     cerrarModalEdicionFijo();
     renderizarFijosPendientes();
     mostrarVistaResumenBarras();
+  });
+
+  window.addEventListener("popstate", (event) => {
+    const secciones = document.querySelectorAll("section");
+    const visible = Array.from(secciones).find(s => s.style.display !== "none");
+
+    if (visible && visible.id !== "vista-principal") {
+      volverAPrincipal(); // o tu función central para regresar
+    } else {
+      const salir = confirm("¿Deseas salir de la app?");
+      if (!salir) {
+        history.pushState(null, "", location.pathname); // evita salir
+      } else {
+        window.close(); // puede no cerrar en algunos navegadores
+      }
+    }
   });
 
 });
