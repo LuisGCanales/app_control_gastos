@@ -112,23 +112,26 @@ function cargarLimites() {
 
 const mostrarConfiguracion = () => {
   document.getElementById("vista-principal").style.display = "none";
+  document.getElementById("resumen").style.display = "none";
   document.getElementById("vista-configuracion").style.display = "block";
   history.pushState({ vista: "otra" }, "", "#otra");
 };
 
 function mostrarFijosPendientes() {
   document.getElementById("vista-principal").style.display = "none";
+  document.getElementById("resumen").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
   renderizarFijosPendientes();
   history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 const volverAPrincipal = () => {
-  ["vista-configuracion", "vista-tabla", "vista-fijos-pendientes", "modal-edicion-fijo", "vista-graficas"].forEach(id => {
+  ["vista-configuracion", "vista-tabla", "vista-fijos-pendientes", "modal-edicion-fijo", "modal-edicion", "vista-graficas"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
   });
   document.getElementById("vista-principal").style.display = "block";
+  document.getElementById("resumen").style.display = "block";
   
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock("portrait").catch((err) => {
@@ -234,6 +237,7 @@ function actualizarSugerencias() {
 
 function mostrarTabla() {
   document.getElementById("vista-principal").style.display = "none";
+  document.getElementById("resumen").style.display = "none";
   document.getElementById("vista-tabla").style.display = "block";
 
   // Renderiza y asigna eventos
@@ -1067,7 +1071,7 @@ history.replaceState({ vista: "principal" }, "", "#inicio");
 window.addEventListener("popstate", () => {
   const visible = document.querySelector("section[style*='display: block']");
 
-  if (visible) {
+  if (visible && visible.id !== "resumen") {
     volverAPrincipal(); // regresa a principal
   } else {
     const salir = confirm("¿Deseas salir de la app?");
