@@ -478,14 +478,14 @@ td.disponible.excedido {
 }
 
 #vista-graficas canvas {
-  width: 90vw !important;
+  width: 100% !important;
   height: auto !important;
-  max-width: 90vw;
+  max-width: 100%;
 }
 
 @media screen and (orientation: landscape) {
   .container {
-    max-width: 90vw;
+    max-width: 70vw;
     margin: 2em auto;
   }
 }
