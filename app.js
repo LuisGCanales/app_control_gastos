@@ -356,6 +356,7 @@ function abrirFormularioEdicion(gasto) {
 function cerrarFormularioEdicion() {
   document.getElementById("modal-edicion").style.display = "none";
   document.getElementById("vista-tabla").style.display = "block";
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 // === GASTOS FIJOS PENDIENTES ===
@@ -480,6 +481,7 @@ function abrirEdicionFijo(idx) {
 function cerrarFormularioEdicionFijo() {
   document.getElementById("modal-edicion-fijo").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 
@@ -487,6 +489,7 @@ function cerrarModalEdicionFijo() {
   document.getElementById("modal-edicion-fijo").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
   document.getElementById("editar-fijo").dataset.idx = ""; // Limpia el índice
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 function cerrarModalPagoFijo() {
@@ -496,6 +499,7 @@ function cerrarModalPagoFijo() {
 
   // ✅ Mostrar vista deseada
   document.getElementById("vista-fijos-pendientes").style.display = "block";
+  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 
