@@ -138,7 +138,7 @@ const volverAPrincipal = () => {
       console.log("No se pudo volver a bloquear a portrait:", err);
     });
   }
-  history.replaceState(null, "", location.pathname);
+  history.pushState({ vista: "principal" }, "", "#inicio");
 };
   
 // === OPERACIONES CON GASTOS ===
@@ -1066,7 +1066,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     mostrarVistaResumenBarras();
   });
 
-history.replaceState({ vista: "principal" }, "", "#inicio");
+history.pushState({ vista: "principal" }, "", "#inicio");
 
 window.addEventListener("popstate", () => {
   const visible = document.querySelector("section[style*='display: block']");
@@ -1078,7 +1078,7 @@ window.addEventListener("popstate", () => {
     if (!salir) {
       history.pushState({ vista: "principal" }, "", "#inicio");
     } else {
-      window.close(); // puede no funcionar en todos los navegadores
+      alert("Puedes cerrar la app desde el botón de retroceso del sistema.");
     }
   }
 });
