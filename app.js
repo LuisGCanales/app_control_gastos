@@ -566,6 +566,21 @@ function mostrarVistaGraficas() {
 
   if (window.graficoGastos) window.graficoGastos.destroy();  // limpiar si ya existe
 
+  const canvas = document.getElementById("grafica-gastos-diarios");
+
+  // Establecer dimensiones visuales
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+
+  // Establecer dimensiones internas reales para alta resolución
+  const dpr = window.devicePixelRatio || 1;
+  console.log(dpr);
+  const rect = canvas.getBoundingClientRect();
+  console.log(rect);
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
   window.graficoGastos = new Chart(ctx, {
     type: 'line',
     data: {
@@ -597,7 +612,8 @@ function mostrarVistaGraficas() {
       ]
     },
     options: {
-      responsive: false,
+      responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         tooltip: {
           usePointStyle: true,
