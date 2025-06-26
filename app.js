@@ -537,6 +537,11 @@ function importarFijosCSV(e) {
 function mostrarVistaGraficas() {
   document.getElementById("vista-tabla").style.display = "none";
   document.getElementById("vista-graficas").style.display = "block";
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock("landscape").catch((err) => {
+      console.log("No se pudo bloquear la orientación:", err);
+    });
+  }
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
 
