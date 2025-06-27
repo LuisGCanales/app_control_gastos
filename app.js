@@ -114,7 +114,7 @@ const mostrarConfiguracion = () => {
   document.getElementById("vista-principal").style.display = "none";
   document.getElementById("resumen").style.display = "none";
   document.getElementById("vista-configuracion").style.display = "block";
-  history.pushState({ vista: "otra" }, "", "#otra");
+  history.pushState({ vista: "vista-configuracion" }, "", "#vista-configuracion");
 };
 
 function mostrarFijosPendientes() {
@@ -122,7 +122,7 @@ function mostrarFijosPendientes() {
   document.getElementById("resumen").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
   renderizarFijosPendientes();
-  history.pushState({ vista: "otra" }, "", "#otra");
+  history.pushState({ vista: "vista-fijos-pendientes" }, "", "#vista-fijos-pendientes");
 }
 
 const volverAPrincipal = () => {
@@ -254,7 +254,7 @@ function mostrarTabla() {
     document.getElementById("filtro-solo-compartido").checked = false;
     renderizarTablaGastos();
   });
-  history.pushState({ vista: "otra" }, "", "#otra");
+  history.pushState({ vista: "vista-tabla" }, "", "#vista-tabla");
 }
 
 function renderizarTablaGastos() {
@@ -350,13 +350,12 @@ function abrirFormularioEdicion(gasto) {
   document.getElementById("editar-compartido").checked = gasto.compartido;
   document.getElementById("editar-fijo").checked = gasto.fijo || false;
   document.getElementById("editar-fecha").value = gasto.timestamp.slice(0, 10);
-  history.replaceState({ vista: "principal" }, "", "#inicio");
+  history.pushState({ vista: "modal-edicion" }, "", "#modal-edicion");
 }
 
 function cerrarFormularioEdicion() {
   document.getElementById("modal-edicion").style.display = "none";
   document.getElementById("vista-tabla").style.display = "block";
-  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 // === GASTOS FIJOS PENDIENTES ===
@@ -475,13 +474,12 @@ function abrirEdicionFijo(idx) {
     btnReactivar.style.display = "none";
     btnPagar.style.display = "none"; 
   }
-  history.replaceState({ vista: "principal" }, "", "#inicio");
+  history.pushState({ vista: "modal-edicion-fijo" }, "", "#modal-edicion-fijo");
 }
 
 function cerrarFormularioEdicionFijo() {
   document.getElementById("modal-edicion-fijo").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
-  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 
@@ -489,7 +487,6 @@ function cerrarModalEdicionFijo() {
   document.getElementById("modal-edicion-fijo").style.display = "none";
   document.getElementById("vista-fijos-pendientes").style.display = "block";
   document.getElementById("editar-fijo").dataset.idx = ""; // Limpia el índice
-  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 function cerrarModalPagoFijo() {
@@ -499,7 +496,6 @@ function cerrarModalPagoFijo() {
 
   // ✅ Mostrar vista deseada
   document.getElementById("vista-fijos-pendientes").style.display = "block";
-  history.pushState({ vista: "otra" }, "", "#otra");
 }
 
 
@@ -675,7 +671,12 @@ function mostrarVistaGraficas() {
       }
     }
   });
-  history.pushState({ vista: "otra" }, "", "#otra");
+  history.pushState({ vista: "vista-graficas" }, "", "#vista-graficas");
+}
+
+function cerrarVistaGraficas() {
+  document.getElementById("vista-graficas").style.display = "none";
+  document.getElementById("vista-tabla").style.display = "block";
 }
 
 // Visualización de resumen por categoría con barras apiladas
@@ -1010,7 +1011,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     const idx = +document.getElementById("editar-fijo").dataset.idx;
     const fijos = obtenerFijosPendientes();
     const fijo = fijos[idx];
-
+ 
     // Prellenar formulario del modal de pago
     document.getElementById("pago-fijo-concepto").value = fijo.concepto;
     document.getElementById("pago-fijo-monto").value = fijo.monto;
@@ -1076,6 +1077,11 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     if (visible.id === "modal-edicion") {
       cerrarFormularioEdicion();
+      return;
+    }
+
+    if (visible.id === "vista-graficas") {
+      cerrarVistaGraficas();
       return;
     }
 
