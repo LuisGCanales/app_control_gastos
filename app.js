@@ -570,7 +570,7 @@ function mostrarVistaGraficas() {
 
   // Generar fechas ISO completas entre inicio y fin
   const fechasISO = [];
-  for (let d = crearFechaLocal(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+  for (let d = inicio; d <= fin; d.setDate(d.getDate() + 1)) {
     const iso = toLocalISODate(d);
     fechasISO.push(iso);
   }
