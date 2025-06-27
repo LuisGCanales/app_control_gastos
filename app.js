@@ -643,12 +643,19 @@ function mostrarVistaGraficas() {
         tooltip: {
           usePointStyle: true,
           callbacks: {
+            title: function(context) {
+              const fechaISO = Object.keys(agrupados).sort()[context[0].dataIndex];
+              const fecha = crearFechaLocal(fechaISO);
+              const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+              const nombreDia = dias[fecha.getDay()];
+              return [`${formatFechaCorta(fechaISO)} (${nombreDia})`]; // esto se muestra como primera línea
+            },
             label: function(context) {
               const monto = context.parsed.y?.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               });
-              return monto ? ` Monto: $${monto}` : null;
+              return monto ? `   $${monto}` : null;
             }
           }
         },
