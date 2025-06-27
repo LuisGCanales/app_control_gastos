@@ -1,10 +1,10 @@
 {
-  "name": "Control de Gastos",
+  "name": "Control de Gastos V19.2",
   "short_name": "Gastos",
   "start_url": "./index.html",
   "display": "fullscreen",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "any",
   "description": "App ligera para registrar y monitorear tus gastos diarios, semanales y mensuales.",
   "icons": [
