@@ -231,7 +231,7 @@ td.disponible.excedido {
   display: block;
   border-radius: 100px;
   position: relative;
-  transition: background 0.3s ease;
+  transition: 0.3s ease;
 }
 
 .checkbox-wrapper-17 label:after {
@@ -241,7 +241,7 @@ td.disponible.excedido {
   left: 2.5%;
   width: calc(50% - 5%);
   height: calc(100% - 11%);
-  background: #fff;
+  background: rgb(36, 32, 30);
   border-radius: 90px;
   transition: 0.3s;
 }
@@ -253,6 +253,7 @@ td.disponible.excedido {
 .checkbox-wrapper-17 input:checked + label:after {
   left: calc(100% - 2.5%);
   transform: translateX(-100%);
+  background: rgb(29, 25, 25);
 }
 
 .checkbox-wrapper-17 label:active:after {
