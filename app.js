@@ -556,16 +556,28 @@ function mostrarVistaGraficas() {
   // Filtrar solo gastos variables
   const variables = gastos.filter(g => !g.fijo);
 
-  // Agrupar por fecha
+  // Agrupar por fecha (solo fechas con gasto)
   const agrupados = {};
   variables.forEach(g => {
     const fecha = g.timestamp.slice(0, 10);
     agrupados[fecha] = (agrupados[fecha] || 0) + g.monto;
   });
 
-  const fechasISO = Object.keys(agrupados).sort();
+  // Obtener fechas mínima y máxima en datos variables
+  const todasFechas = variables.map(g => g.timestamp.slice(0, 10)).sort();
+  const inicio = crearFechaLocal(todasFechas[0]);
+  const fin = crearFechaLocal(todasFechas[todasFechas.length - 1]);
+
+  // Generar fechas ISO completas entre inicio y fin
+  const fechasISO = [];
+  for (let d = crearFechaLocal(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+    const iso = toLocalISODate(d);
+    fechasISO.push(iso);
+  }
+
+  // Generar series de datos completas (0 si no hubo gasto ese día)
   const fechas = fechasISO.map(f => formatFechaCorta(f));
-  const montos = fechasISO.map(f => agrupados[f]);
+  const montos = fechasISO.map(f => agrupados[f] || 0);
 
   // Promedio acumulativo
   const promedioAcumulativo = [];
