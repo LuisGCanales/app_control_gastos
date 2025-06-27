@@ -565,34 +565,37 @@ function mostrarVistaGraficas() {
 
   const fechasISO = Object.keys(agrupados).sort();
   const fechas = fechasISO.map(f => formatFechaCorta(f));
-
   const montos = fechasISO.map(f => agrupados[f]);
 
+  // Promedio acumulativo
   const promedioAcumulativo = [];
   let suma = 0;
-
   for (let i = 0; i < montos.length; i++) {
     suma += montos[i];
     promedioAcumulativo.push(suma / (i + 1));
   }
+
+  // Promedio móvil de 7 días
+  const promedioMovil = montos.map((_, i) => {
+    if (i < 6) return null; // Ignorar primeros 6 días
+    const ventana = montos.slice(i - 6, i + 1); // últimos 7
+    const suma = ventana.reduce((a, b) => a + b, 0);
+    return suma / 7;
+  });
+
   const ctx = document.getElementById("grafica-gastos-diarios").getContext("2d");
 
-  if (window.graficoGastos) window.graficoGastos.destroy();  // limpiar si ya existe
+  if (window.graficoGastos) window.graficoGastos.destroy();
 
   const canvas = document.getElementById("grafica-gastos-diarios");
-
-  // Establecer dimensiones visuales
   canvas.style.width = '100%';
   canvas.style.height = '100%';
-
-  // Establecer dimensiones internas reales para alta resolución
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * dpr;
   canvas.height = rect.height * dpr;
-
   ctx.scale(dpr, dpr);
-  
+
   window.graficoGastos = new Chart(ctx, {
     type: 'line',
     data: {
@@ -608,12 +611,23 @@ function mostrarVistaGraficas() {
           tension: 0.2,
           pointRadius: 2,
           pointHoverRadius: 10,
-          pointHitRadius: 20        
+          pointHitRadius: 20
         },
         {
           label: "Promedio acumulativo",
           data: promedioAcumulativo,
           borderColor: "rgba(220, 20, 60, 1)",
+          borderWidth: 1,
+          tension: 0.2,
+          pointRadius: 1.5,
+          pointHoverRadius: 10,
+          pointHitRadius: 20,
+          fill: false
+        },
+        {
+          label: "Promedio móvil (7 días)",
+          data: promedioMovil,
+          borderColor: "#2196F3",
           borderWidth: 1,
           tension: 0.2,
           pointRadius: 1.5,
@@ -630,11 +644,11 @@ function mostrarVistaGraficas() {
           usePointStyle: true,
           callbacks: {
             label: function(context) {
-              const monto = context.parsed.y.toLocaleString("es-MX", {
+              const monto = context.parsed.y?.toLocaleString("es-MX", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               });
-              return ` Monto: $${monto}`;
+              return monto ? ` Monto: $${monto}` : null;
             }
           }
         },
@@ -665,6 +679,7 @@ function mostrarVistaGraficas() {
       }
     }
   });
+
   history.pushState({ vista: "vista-graficas" }, "", "#vista-graficas");
 }
 
