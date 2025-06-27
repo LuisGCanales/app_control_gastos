@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gastos-app-v18';
+const CACHE_NAME = 'gastos-app-v19';
 const urlsToCache = [
   './',
   './index.html',

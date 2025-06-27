@@ -776,15 +776,13 @@ function mostrarVistaResumenBarras() {
           barThickness: 30,
 
           data: normalizar(gastado),
-          // backgroundColor: "rgba(229,115,115,1)"
-          backgroundColor: "rgba(82, 52, 33, 0.7)"
+          backgroundColor: "rgba(57, 32, 18, 0.7)"
         },
         {
           label: "Disponible",
           barThickness: 30,
           data: normalizar(disponible),
-          // backgroundColor: "rgba(129,199,132,1)"
-          backgroundColor: "rgba(63, 63, 63, 0.7)"
+          backgroundColor: "rgba(26, 32, 36, 0.6)"
         }
       ]
     },
