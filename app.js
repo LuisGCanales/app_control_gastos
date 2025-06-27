@@ -132,12 +132,6 @@ const volverAPrincipal = () => {
   });
   document.getElementById("vista-principal").style.display = "block";
   document.getElementById("resumen").style.display = "block";
-  
-  if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock("portrait").catch((err) => {
-      console.log("No se pudo volver a bloquear a portrait:", err);
-    });
-  }
 };
   
 // === OPERACIONES CON GASTOS ===
@@ -677,6 +671,12 @@ function mostrarVistaGraficas() {
 function cerrarVistaGraficas() {
   document.getElementById("vista-graficas").style.display = "none";
   document.getElementById("vista-tabla").style.display = "block";
+  
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock("portrait").catch((err) => {
+      console.log("No se pudo volver a bloquear a portrait:", err);
+    });
+  }
 }
 
 // Visualización de resumen por categoría con barras apiladas
@@ -861,6 +861,12 @@ document.addEventListener("DOMContentLoaded", () => {
   cargarLimites();
   mostrarVistaResumenBarras();
   actualizarSugerencias();
+
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock("portrait").catch((err) => {
+      console.log("No se pudo volver a bloquear a portrait:", err);
+    });
+  }
 
   document.getElementById("gasto-form").addEventListener("submit", agregarGasto);
   document.getElementById("config-form").addEventListener("submit", e => {
