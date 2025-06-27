@@ -782,7 +782,7 @@ function mostrarVistaResumenBarras() {
           label: "Disponible",
           barThickness: 30,
           data: normalizar(disponible),
-          backgroundColor: "rgb(85, 52, 44)"
+          backgroundColor: "rgb(85, 52, 44, 0.5)"
         }
       ]
     },
