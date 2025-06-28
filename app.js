@@ -562,7 +562,7 @@ function mostrarVistaGraficas() {
     const fecha = g.timestamp.slice(0, 10);
     agrupados[fecha] = (agrupados[fecha] || 0) + g.monto;
   });
-
+  console.log(agrupados);
   // Obtener fechas mínima y máxima en datos variables
   const todasFechas = variables.map(g => g.timestamp.slice(0, 10)).sort();
   const inicio = crearFechaLocal(todasFechas[0]);
@@ -656,7 +656,7 @@ function mostrarVistaGraficas() {
           usePointStyle: true,
           callbacks: {
             title: function(context) {
-              const fechaISO = Object.keys(agrupados).sort()[context[0].dataIndex];
+              const fechaISO = fechasISO.sort()[context[0].dataIndex];
               const fecha = crearFechaLocal(fechaISO);
               const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
               const nombreDia = dias[fecha.getDay()];
