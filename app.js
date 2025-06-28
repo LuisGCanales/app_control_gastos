@@ -562,7 +562,7 @@ function mostrarVistaGraficas() {
     const fecha = g.timestamp.slice(0, 10);
     agrupados[fecha] = (agrupados[fecha] || 0) + g.monto;
   });
-  console.log(agrupados);
+
   // Obtener fechas mínima y máxima en datos variables
   const todasFechas = variables.map(g => g.timestamp.slice(0, 10)).sort();
   const inicio = crearFechaLocal(todasFechas[0]);
