@@ -757,17 +757,25 @@ function mostrarVistaResumenBarras() {
   const gastado = categorias.map(k => resumen[k].gasto);
   const disponible = categorias.map(k => resumen[k].limite - resumen[k].gasto);
   const totales = categorias.map((_, i) => Math.max(resumen[categorias[i]].limite, resumen[categorias[i]].gasto, 1));
-  const normalizar = arr => arr.map((v, i) => Math.max(v, 0) / totales[i]);
+  const normalizar = arr => arr.map((v, i) => totales[i] > 0 ? Math.max(v, 0) / totales[i] : 0);
 
   const ctx = document.getElementById("grafica-resumen-barras").getContext("2d");  
+
   if (window.graficoResumen) {
     window.graficoResumen.data.labels = categorias;
     window.graficoResumen.data.datasets[0].data = normalizar(gastado);
     window.graficoResumen.data.datasets[1].data = normalizar(disponible);
     window.graficoResumen.options.plugins.datalabels.formatter = crearFormatter(gastado, disponible);
+    window.graficoResumen.options.plugins.datalabels.color = context => {
+      const label = context.dataset.label;
+      const index = context.dataIndex;
+      const value = label === "Gastado" ? gastado[index] : disponible[index];
+      return value < 0 ? '#FE170D' : '#fff';
+    };
     window.graficoResumen.update();
     return;
-  } 
+  }
+ 
 
   function crearFormatter(gastado, disponible) {
     return (value, context) => {
