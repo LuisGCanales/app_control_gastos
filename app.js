@@ -595,6 +595,27 @@ function mostrarVistaGraficas() {
     return suma / 7;
   });
 
+  // 1. Calcular límite diario ajustado
+  const conf = cargarLimites();
+  const hoy = getToday();
+  const inicioMes = getMonthCustom(hoy, conf.inicioMes);
+  const finMes = getMonthCustom(sumarDias(inicioMes, 32), conf.inicioMes);
+  const diasMes = (new Date(finMes) - new Date(inicioMes)) / (1000 * 60 * 60 * 24);
+  const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
+  const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
+
+  const limiteMensualAjustado = conf.mes - totalFijosPendientes;
+  const limiteDiarioAjustado = limiteMensualAjustado / diasMes;
+
+  const dataLimite = [
+    { x: fechas[0], y: limiteDiarioAjustado },
+    { x: fechas[fechas.length - 1], y: limiteDiarioAjustado }
+  ];
+
+
+  console.log("dataLimite");
+  console.log(dataLimite);
+
   const ctx = document.getElementById("grafica-gastos-diarios").getContext("2d");
 
   if (window.graficoGastos) window.graficoGastos.destroy();
@@ -646,6 +667,21 @@ function mostrarVistaGraficas() {
           pointHoverRadius: 10,
           pointHitRadius: 20,
           fill: false
+        },
+        {
+          label: "Límite diario ajustado",
+          data: dataLimite,
+          borderColor: "orange",
+          borderDash: [6, 6],
+          borderWidth: 0.7,
+          pointRadius: 1,
+          pointBackgroundColor: "orange",
+          pointHoverRadius: 10,
+          pointHitRadius: 20,
+          pointHoverBackgroundColor: "orange",
+          fill: false,
+          tension: 0,
+          spanGaps: true // permite trazar la línea entre puntos separados
         }
       ]
     },
