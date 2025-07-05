@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V25</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V26</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -250,6 +250,14 @@
   <!-- Vista de gráficas de gastos variables -->
   <section class="container" id="vista-graficas" style="display: none;">
     <h2>Gastos variables diarios</h2>
+    <div class="checkbox-wrapper-17" style="margin-bottom: 1em; display: flex; flex-direction: column; align-items: center;">
+      <input type="checkbox" id="switch-periodo-actual" />
+      <label for="switch-periodo-actual" title="Alternar entre histórico y periodo actual"></label>
+      <span class="switch-label">
+        <span id="label-historico">Histórico</span> /
+        <span id="label-periodo">Periodo actual</span>
+      </span>
+    </div>
     <canvas id="grafica-gastos-diarios"></canvas>
     <button type="button" onclick="cerrarVistaGraficas()">Volver</button>
   </section>

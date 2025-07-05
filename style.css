@@ -506,3 +506,12 @@ td.disponible.excedido {
   vertical-align: sup;
   margin-left: 0.2em;
 }
+
+.switch-label span.bold {
+  font-weight: bold;
+}
+
+.switch-label span.strike {
+  text-decoration: line-through;
+  opacity: 0.6;
+}

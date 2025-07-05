@@ -545,41 +545,51 @@ function importarFijosCSV(e) {
 function mostrarVistaGraficas() {
   document.getElementById("vista-tabla").style.display = "none";
   document.getElementById("vista-graficas").style.display = "block";
+
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock("landscape").catch((err) => {
       console.log("No se pudo bloquear la orientación:", err);
     });
   }
 
-  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+  document.getElementById("switch-periodo-actual").addEventListener("change", mostrarVistaGraficas);
+  const checked = document.getElementById("switch-periodo-actual").checked;
+  document.getElementById("label-historico").className = checked ? "strike" : "bold";
+  document.getElementById("label-periodo").className = checked ? "bold" : "strike";
 
-  // Filtrar solo gastos variables
+  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   const variables = gastos.filter(g => !g.fijo);
 
-  // Agrupar por fecha (solo fechas con gasto)
+  const conf = cargarLimites();
+  const hoy = getToday();
+  const inicioPeriodo = getMonthCustom(hoy, conf.inicioMes);
+  const finPeriodo = getMonthCustom(sumarDias(inicioPeriodo, 32), conf.inicioMes);
+  const mostrarPeriodoActual = document.getElementById("switch-periodo-actual")?.checked ?? false;
+
   const agrupados = {};
   variables.forEach(g => {
     const fecha = g.timestamp.slice(0, 10);
     agrupados[fecha] = (agrupados[fecha] || 0) + g.monto;
   });
 
-  // Obtener fechas mínima y máxima en datos variables
+  // Todas las fechas posibles
   const todasFechas = variables.map(g => g.timestamp.slice(0, 10)).sort();
   const inicio = crearFechaLocal(todasFechas[0]);
   const fin = crearFechaLocal(todasFechas[todasFechas.length - 1]);
 
-  // Generar fechas ISO completas entre inicio y fin
-  const fechasISO = [];
-  for (let d = inicio; d <= fin; d.setDate(d.getDate() + 1)) {
-    const iso = toLocalISODate(d);
-    fechasISO.push(iso);
+  const fechasISOcompleto = [];
+  for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+    fechasISOcompleto.push(toLocalISODate(d));
   }
 
-  // Generar series de datos completas (0 si no hubo gasto ese día)
+  const fechasISO = mostrarPeriodoActual
+    ? fechasISOcompleto.filter(f => f >= inicioPeriodo && f < finPeriodo)
+    : fechasISOcompleto;
+
   const fechas = fechasISO.map(f => formatFechaCorta(f));
   const montos = fechasISO.map(f => agrupados[f] || 0);
 
-  // Promedio acumulativo
+  // Promedio acumulativo solo para días mostrados
   const promedioAcumulativo = [];
   let suma = 0;
   for (let i = 0; i < montos.length; i++) {
@@ -587,23 +597,22 @@ function mostrarVistaGraficas() {
     promedioAcumulativo.push(suma / (i + 1));
   }
 
-  // Promedio móvil de 7 días
-  const promedioMovil = montos.map((_, i) => {
-    if (i < 6) return null; // Ignorar primeros 6 días
-    const ventana = montos.slice(i - 6, i + 1); // últimos 7
-    const suma = ventana.reduce((a, b) => a + b, 0);
+  // Promedio móvil a 7 días calculado con histórico
+  const promedioMovilCompleto = fechasISOcompleto.map((_, i) => {
+    if (i < 6) return null;
+    const ventana = fechasISOcompleto.slice(i - 6, i + 1);
+    const suma = ventana.reduce((acc, fecha) => acc + (agrupados[fecha] || 0), 0);
     return suma / 7;
   });
 
-  // 1. Calcular límite diario ajustado
-  const conf = cargarLimites();
-  const hoy = getToday();
-  const inicioMes = getMonthCustom(hoy, conf.inicioMes);
-  const finMes = getMonthCustom(sumarDias(inicioMes, 32), conf.inicioMes);
+  const promedioMovil = fechasISO.map(f => promedioMovilCompleto[fechasISOcompleto.indexOf(f)]);
+
+  // Límite diario ajustado
+  const inicioMes = inicioPeriodo;
+  const finMes = finPeriodo;
   const diasMes = (new Date(finMes) - new Date(inicioMes)) / (1000 * 60 * 60 * 24);
   const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
   const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
-
   const limiteMensualAjustado = conf.mes - totalFijosPendientes;
   const limiteDiarioAjustado = limiteMensualAjustado / diasMes;
 
@@ -611,10 +620,6 @@ function mostrarVistaGraficas() {
     { x: fechas[0], y: limiteDiarioAjustado },
     { x: fechas[fechas.length - 1], y: limiteDiarioAjustado }
   ];
-
-
-  console.log("dataLimite");
-  console.log(dataLimite);
 
   const ctx = document.getElementById("grafica-gastos-diarios").getContext("2d");
 
@@ -646,7 +651,7 @@ function mostrarVistaGraficas() {
           pointHoverRadius: 10,
           pointHitRadius: 20
         },
-        {
+        ...(!mostrarPeriodoActual ? [{
           label: "Promedio acumulativo",
           data: promedioAcumulativo,
           borderColor: "rgba(220, 20, 60, 1)",
@@ -656,7 +661,17 @@ function mostrarVistaGraficas() {
           pointHoverRadius: 10,
           pointHitRadius: 20,
           fill: false
-        },
+        }] : [{
+          label: "Promedio acumulativo",
+          data: promedioAcumulativo,
+          borderColor: "rgba(220, 20, 60, 1)",
+          borderWidth: 1,
+          tension: 0.2,
+          pointRadius: 1.5,
+          pointHoverRadius: 10,
+          pointHitRadius: 20,
+          fill: false
+        }]),
         {
           label: "Promedio móvil (7 días)",
           data: promedioMovil,
@@ -674,14 +689,14 @@ function mostrarVistaGraficas() {
           borderColor: "orange",
           borderDash: [6, 6],
           borderWidth: 0.7,
-          pointRadius: 1,
+          pointRadius: 2.5,
           pointBackgroundColor: "orange",
           pointHoverRadius: 10,
           pointHitRadius: 20,
           pointHoverBackgroundColor: "orange",
           fill: false,
           tension: 0,
-          spanGaps: true // permite trazar la línea entre puntos separados
+          spanGaps: true
         }
       ]
     },
@@ -692,11 +707,11 @@ function mostrarVistaGraficas() {
           usePointStyle: true,
           callbacks: {
             title: function(context) {
-              const fechaISO = fechasISO.sort()[context[0].dataIndex];
+              const fechaISO = fechasISOcompleto.sort()[context[0].dataIndex];
               const fecha = crearFechaLocal(fechaISO);
               const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
               const nombreDia = dias[fecha.getDay()];
-              return [`${formatFechaCorta(fechaISO)} (${nombreDia})`]; // esto se muestra como primera línea
+              return [`${formatFechaCorta(fechaISO)} (${nombreDia})`];
             },
             label: function(context) {
               const monto = context.parsed.y?.toLocaleString("es-MX", {
