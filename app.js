@@ -165,6 +165,7 @@ function agregarGasto(e) {
   }
 
   document.getElementById("gasto-form").reset();
+  document.getElementById("fecha-personalizada").style.display = "none";
   mostrarVistaResumenBarras();
   actualizarSugerencias();
   volverAPrincipal();
