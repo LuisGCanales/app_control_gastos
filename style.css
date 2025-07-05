@@ -515,3 +515,13 @@ td.disponible.excedido {
   text-decoration: line-through;
   opacity: 0.6;
 }
+
+/* Reduce tamaño solo para el switch de periodo */
+.mini-switch {
+  --size: 28px;
+  transform: scale(0.45);
+}
+
+.mini-switch .switch-label {
+  font-size: 1.5em;
+}
