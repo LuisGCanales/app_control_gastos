@@ -95,50 +95,6 @@ button:hover {
   background-color: #392012;
 }
 
-/* ========================================
-   TABLA RESUMEN
-======================================== */
-
-#resumen table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.2em;
-  font-size: 0.95em;
-}
-
-#resumen th,
-#resumen td {
-  padding: 0.6em;
-  text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-#resumen th {
-  background-color: rgba(255, 255, 255, 0.05);
-  font-weight: 600;
-  color: #ddd;
-}
-
-#resumen td {
-  color: #ddd;
-}
-
-td.disponible {
-  font-weight: bold;
-  color: #ffffff;
-}
-
-td.disponible.excedido {
-  color: #ff8080 !important;
-  font-weight: bold;
-}
-
-#resumen tr.espaciador td {
-  padding: 0;
-  border: none;
-  height: 3em;
-  background: transparent;
-}
 
 /* ========================================
    TABLA DE GASTOS
@@ -524,4 +480,11 @@ td.disponible.excedido {
 
 .mini-switch .switch-label {
   font-size: 1.5em;
+}
+
+@media (min-width: 1024px) {
+  #grafica-resumen-barras {
+    height: 350px !important;
+    width: 100%;
+  }
 }

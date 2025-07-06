@@ -861,7 +861,7 @@ function mostrarVistaResumenBarras() {
     plugins: [ChartDataLabels],
     options: {
       indexAxis: 'y',
-      responsive: false,
+      responsive: true,
       scales: {
         x: {
           stacked: true,
