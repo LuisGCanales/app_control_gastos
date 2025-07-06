@@ -1196,9 +1196,13 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
   });
 
   document.addEventListener("visibilitychange", () => {
-    const graficaVisible = document.getElementById("grafica-resumen-barras").style.display === "block";
-    if (!document.hidden && graficaVisible) {
-      mostrarVistaResumenBarras();
+    if (!document.hidden) {
+      const graficaVisible = document.getElementById("vista-graficas").style.display === "block";
+      const resumenVisible = document.getElementById("vista-principal").style.display === "block" &&
+                            document.getElementById("resumen").style.display === "block";
+
+      if (graficaVisible) mostrarVistaGraficas();
+      if (resumenVisible) mostrarVistaResumenBarras();
     }
   });
 
