@@ -1206,4 +1206,13 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     }
   });
 
+  window.addEventListener("pageshow", () => {
+    const graficaVisible = document.getElementById("vista-graficas").style.display === "block";
+    const resumenVisible = document.getElementById("vista-principal").style.display === "block" &&
+                          document.getElementById("resumen").style.display === "block";
+
+    if (graficaVisible) mostrarVistaGraficas();
+    if (resumenVisible) mostrarVistaResumenBarras();
+  });
+
 });
