@@ -1195,4 +1195,11 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
   });
 
+  document.addEventListener("visibilitychange", () => {
+    const graficaVisible = document.getElementById("grafica-resumen-barras").style.display === "block";
+    if (!document.hidden && graficaVisible) {
+      mostrarVistaGraficas();
+    }
+  });
+
 });
