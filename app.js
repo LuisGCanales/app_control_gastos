@@ -94,9 +94,97 @@ const sumarDias = (fechaStr, dias) => {
 
 // === CONFIGURACIÓN ===
 
+
+const distribucionSemanalPorDefecto = {
+  0: 0,        // Domingo        0 %
+  1: 0.4 / 3,  // Lunes       13.3 %
+  2: 0.4 / 3,  // Martes      13.3 %
+  3: 0.5 / 3,  // Miércoles   16.7 %
+  4: 0.4 / 3,  // Jueves      13.3 %
+  5: 0.8 / 3,  // Viernes     26.7 %
+  6: 0.5 / 3   // Sábado      16.7 %
+};
+
+function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, inicioSemana }) {
+  const hoy = new Date();
+  const diaHoy = hoy.getDay();
+
+  // Determina día de inicio de semana más reciente
+  const inicio = new Date(hoy);
+  const offset = (diaHoy - inicioSemana + 7) % 7;
+  inicio.setDate(hoy.getDate() - offset);
+  inicio.setHours(0, 0, 0, 0);
+  console.log("→ Inicio semana:", inicio);
+
+  // Días en orden de la semana desde inicio
+  const diasSemana = [...Array(7)].map((_, i) => (inicio.getDay() + i) % 7);
+  console.log("→ Días semana:", diasSemana);
+
+  // Día actual en índice relativo al ciclo semanal
+  const hoyRelativo = (diaHoy - inicioSemana + 7) % 7;
+  console.log("→ Hoy relativo:", hoyRelativo);
+
+  const diasFaltantes = diasSemana.slice(hoyRelativo);
+  console.log("→ Días faltantes:", diasFaltantes);
+
+  // Filtrar gastos de esta semana
+  const fechaInicioISO = toLocalISODate(inicio);
+  console.log("→ Fecha Inicio:", fechaInicioISO);
+
+  const fechaFinISO = toLocalISODate(new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 7));
+  console.log("→ Fecha Final:", fechaFinISO);
+
+  const gastosSemana = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO);
+  console.log("→ Gastos Semana:", gastosSemana);
+
+  // Agrupar gasto por día de la semana
+  const gastoPorDia = {};
+  gastosSemana.forEach(g => {
+    const fecha = crearFechaLocal(g.timestamp.slice(0, 10));
+    const dia = fecha.getDay();
+    gastoPorDia[dia] = (gastoPorDia[dia] || 0) + g.monto;
+  });
+  console.log("→ Gastos por día:", gastoPorDia);
+
+  // Gasto acumulado hasta ayer
+  const gastoAcumulado = diasSemana
+    .slice(0, hoyRelativo) // días anteriores
+    .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
+  console.log("→ Gastos Acumulado hasta ayer:", gastoAcumulado);
+
+  const restante = limiteSemanal - gastoAcumulado;
+  console.log("→ Restante:", restante);
+
+  const sumaPorcentajesRestantes = diasFaltantes.reduce((acc, d) => acc + distribucion[d], 0);
+  console.log("→ Suma Porcentajes:", sumaPorcentajesRestantes);
+
+  const limiteDiario = (distribucion[diaHoy] / sumaPorcentajesRestantes) * restante;
+  console.log("→ Limite Diario:", limiteDiario);
+
+  return limiteDiario;
+}
+
 function cargarLimites() {
-  const predet = { dia: 700, semana: 3750, mes: 20000, compartido: 4000, tdc: 15000, inicioSemana: 1, inicioMes: 1, inicioTDC: 11 };
+  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 1, inicioMes: 1, inicioTDC: 12 };
+  const hoy = getToday()
+  const ultimaFechaAplicada = localStorage.getItem("limites_dia_aplicado");
+
   const conf = JSON.parse(localStorage.getItem("limites")) || predet;
+
+  // Si es un nuevo día, actualiza el límite diario automáticamente
+  if (hoy !== ultimaFechaAplicada) {
+    const gastos = JSON.parse(localStorage.getItem("gastos")).filter(g => !g.fijo) || [];
+    const limiteCalculado = calcularLimiteDinamicoDiario({
+      gastos,
+      limiteSemanal: conf.semana,
+      distribucion: distribucionSemanalPorDefecto,
+      inicioSemana: conf.inicioSemana
+    });
+    conf.dia = Math.max(0, Math.round(limiteCalculado)); // evita negativos
+    localStorage.setItem("limites", JSON.stringify(conf));
+    localStorage.setItem("limites_dia_aplicado", hoy); 
+    
+  }
 
   ["dia", "semana", "mes", "compartido", "tdc"].forEach(c =>
     document.getElementById(`limite-${c}`).value = conf[c]
