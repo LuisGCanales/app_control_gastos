@@ -1125,9 +1125,9 @@ function mostrarNotaToast(nota) {
   tooltip.style.display = "block";
   tooltip.style.opacity = "1";
 
-  setTimeout(() => {
+  tooltip.onclick = () => {
     tooltip.style.display = "none";
-  }, 3500);
+  };
 }
 
 function actualizarEtiquetaSwitchTabla(periodoActualActivo) {
