@@ -384,7 +384,7 @@ function renderizarTablaGastos() {
       tr.innerHTML = `
         <td>
           ${g.concepto}
-          ${g.nota ? `<span class="nota-icono" onclick="alert('${g.nota.replace(/'/g, "\\'")}')">📝</span>` : ""}
+          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast('${g.nota.replace(/'/g, "\\'")}')"> 📝</span>` : ""}
         </td>
         <td class="${g.monto < 0 ? 'reintegro' : ''}">${formatCurrency(g.monto)}</td>
         <td class="centrado">${g.tdc ? "ꪜ" : ""}</td>
@@ -1027,6 +1027,17 @@ function mostrarVistaResumenBarras() {
       }
     }
   });
+}
+
+function mostrarNotaToast(nota) {
+  const tooltip = document.getElementById("tooltip-nota");
+  tooltip.textContent = `Nota: ${nota}`;
+  tooltip.style.display = "block";
+  tooltip.style.opacity = "1";
+
+  setTimeout(() => {
+    tooltip.style.display = "none";
+  }, 3000); // Se oculta tras 3 segundos
 }
 
 
