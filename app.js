@@ -652,7 +652,7 @@ function mostrarVistaGraficas() {
   // Todas las fechas posibles
   const todasFechas = variables.map(g => g.timestamp.slice(0, 10)).sort();
   const inicio = crearFechaLocal(todasFechas[0]);
-  const fin = crearFechaLocal(todasFechas[todasFechas.length - 1]);
+  const fin = crearFechaLocal(getToday());
 
   const fechasISOcompleto = [];
   for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
