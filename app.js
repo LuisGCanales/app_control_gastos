@@ -253,9 +253,31 @@ function agregarGasto(e) {
 // la estructura del CSV
 function escaparCampoCSV(campo) {
   if (campo == null) return "";
-  const str = String(campo).replaceAll('"', '""');
-  return str.includes(",") || str.includes('"') ? `"${str}"` : str;
+  const str = String(campo).replaceAll('"', '""'); // escapa comillas dobles
+  return str.includes(",") || str.includes('"') || str.includes("\n") ? `"${str}"` : str;
 }
+
+function dividirLineasCSV(raw) {
+  const lineas = [];
+  let buffer = "";
+  let enComillas = false;
+
+  for (let linea of raw.split("\n")) {
+    buffer += (buffer ? "\n" : "") + linea;
+
+    const numComillas = (buffer.match(/"/g) || []).length;
+    enComillas = numComillas % 2 !== 0;
+
+    if (!enComillas) {
+      lineas.push(buffer);
+      buffer = "";
+    }
+  }
+
+  if (buffer) lineas.push(buffer); // última línea incompleta
+  return lineas;
+}
+
 
 function parsearLineaCSV(linea) {
   const resultado = [];
@@ -311,7 +333,7 @@ function importarCSV(e) {
 
   const reader = new FileReader();
   reader.onload = evt => {
-    const nuevos = evt.target.result.split("\n").slice(1).map(linea => {
+    const nuevos = dividirLineasCSV(evt.target.result).slice(1).map(linea => {
       const [timestamp, monto, concepto, tdc, compartido, fijo, nota] = parsearLineaCSV(linea);
       return {
         timestamp: timestamp.trim().replace(" ", "T"),
@@ -689,8 +711,7 @@ function importarFijosCSV(e) {
 
   const reader = new FileReader();
   reader.onload = evt => {
-    const nuevos = evt.target.result
-      .split("\n")
+    const nuevos = dividirLineasCSV(evt.target.result)
       .slice(1) // omitir encabezado
       .map(linea => {
         const [concepto, monto, fecha, estado, nota] = parsearLineaCSV(linea);
