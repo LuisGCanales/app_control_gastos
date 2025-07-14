@@ -540,3 +540,12 @@ button:hover {
   opacity: 1;
   transform: scale(1.15);
 }
+
+.resumen-fijos {
+  margin-top: 1em;
+  font-weight: 600;
+  font-size: 0.95em;
+  display: flex;
+  justify-content: space-between;
+  color: #f2f2f2;
+}

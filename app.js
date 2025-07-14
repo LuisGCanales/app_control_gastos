@@ -519,6 +519,18 @@ function renderizarFijosPendientes() {
       abrirEdicionFijo(idx);
     });
   });
+
+  // Resúmen con total de Gastos fijos  pagados / pendientes
+  const totalPendientes = fijos.filter(g => g.estado === "pendiente")
+    .reduce((sum, g) => sum + g.monto, 0);
+  const totalPagados = fijos.filter(g => g.estado === "pagado")
+    .reduce((sum, g) => sum + g.monto, 0);
+
+  document.getElementById("resumen-fijos").innerHTML = `
+    <div>Total pagados ✅: $${totalPagados.toLocaleString("es-MX", {minimumFractionDigits: 2})}</div>
+    <div>Total pendientes 🔴: $${totalPendientes.toLocaleString("es-MX", {minimumFractionDigits: 2})}</div>
+  `;
+
 }
 
 // Variable auxiliar
