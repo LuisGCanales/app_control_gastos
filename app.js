@@ -1031,13 +1031,13 @@ function mostrarVistaResumenBarras() {
 
 function mostrarNotaToast(nota) {
   const tooltip = document.getElementById("tooltip-nota");
-  tooltip.textContent = `Nota: ${nota}`;
+  tooltip.innerHTML = `<strong>Nota:</strong><br>${nota}`;
   tooltip.style.display = "block";
   tooltip.style.opacity = "1";
 
   setTimeout(() => {
     tooltip.style.display = "none";
-  }, 3000); // Se oculta tras 3 segundos
+  }, 3000);
 }
 
 

@@ -505,7 +505,7 @@ button:hover {
 
 .tooltip-nota {
   position: fixed;
-  bottom: 5%;
+  bottom: 40%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(20, 20, 20, 0.9);
@@ -514,7 +514,8 @@ button:hover {
   border-radius: 12px;
   font-size: 0.9rem;
   max-width: 80%;
-  text-align: center;
+  border: 2px solid #726963; /* borde café */
+  text-align: left;
   z-index: 9999;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   animation: fadeInOut 3s ease-in-out;
@@ -525,4 +526,17 @@ button:hover {
   10%  { opacity: 1; }
   90%  { opacity: 1; }
   100% { opacity: 0; }
+}
+
+.nota-icono {
+  font-size: 0.8em;
+  opacity: 0.6;
+  cursor: pointer;
+  margin-left: 0.25em;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.nota-icono:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
