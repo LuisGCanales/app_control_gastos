@@ -453,7 +453,7 @@ function renderizarTablaGastos() {
       tr.innerHTML = `
         <td>
           ${g.concepto}
-          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast('${g.nota.replace(/'/g, "\\'")}')"> 📝</span>` : ""}
+          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast(decodeURIComponent('${encodeURIComponent(g.nota)}'))"> 📝</span>` : ""}
         </td>
         <td class="${g.monto < 0 ? 'reintegro' : ''}">${formatCurrency(g.monto)}</td>
         <td class="centrado">${g.tdc ? "ꪜ" : ""}</td>
@@ -569,7 +569,7 @@ function renderizarFijosPendientes() {
       tr.innerHTML = `
         <td>
           ${g.concepto}
-          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast('${g.nota.replace(/'/g, "\\'")}')"> 📝</span>` : ""}
+          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast(decodeURIComponent('${encodeURIComponent(g.nota)}'))"> 📝</span>` : ""}
         </td>
         <td>${formatCurrency(g.monto)}</td>
         <td class="estado ${g.estado}">${estadoEmoji(g.estado)}</td>
@@ -1121,13 +1121,13 @@ function mostrarVistaResumenBarras() {
 
 function mostrarNotaToast(nota) {
   const tooltip = document.getElementById("tooltip-nota");
-  tooltip.innerHTML = `<strong>Nota:</strong><br>${nota}`;
+  tooltip.innerHTML = `<strong>Nota:</strong><br>${nota.replace(/\n/g, "<br>")}`;
   tooltip.style.display = "block";
   tooltip.style.opacity = "1";
 
   setTimeout(() => {
     tooltip.style.display = "none";
-  }, 3000);
+  }, 3500);
 }
 
 function actualizarEtiquetaSwitchTabla(periodoActualActivo) {
