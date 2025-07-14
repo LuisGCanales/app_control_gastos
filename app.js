@@ -1121,13 +1121,22 @@ function mostrarVistaResumenBarras() {
 
 function mostrarNotaToast(nota) {
   const tooltip = document.getElementById("tooltip-nota");
+  
+  tooltip.classList.remove("desaparecer"); // en caso de que venga de una animación anterior
   tooltip.innerHTML = `<strong>Nota:</strong><br>${nota.replace(/\n/g, "<br>")}`;
   tooltip.style.display = "block";
   tooltip.style.opacity = "1";
 
   tooltip.onclick = () => {
-    tooltip.style.display = "none";
+    tooltip.classList.add("desaparecer");
   };
+
+  tooltip.addEventListener("animationend", function cerrar() {
+    if (tooltip.classList.contains("desaparecer")) {
+      tooltip.style.display = "none";
+      tooltip.removeEventListener("animationend", cerrar); // evitar múltiples bindings
+    }
+  });
 }
 
 function actualizarEtiquetaSwitchTabla(periodoActualActivo) {
