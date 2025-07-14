@@ -153,7 +153,7 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
 }
 
 function cargarLimites() {
-  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 6, inicioMes: 12, inicioTDC: 12 };
+  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 6, inicioMes: 12, inicioTDC: 12, inicioCompartido: 1 };
   const hoy = getToday()
   const ultimaFechaAplicada = localStorage.getItem("limites_dia_aplicado");
 
@@ -180,6 +180,7 @@ function cargarLimites() {
   document.getElementById("inicio-semana").value = conf.inicioSemana;
   document.getElementById("inicio-mes").value = conf.inicioMes;
   document.getElementById("inicio-tdc").value = conf.inicioTDC;
+  document.getElementById("inicio-compartido").value = conf.inicioCompartido;
 
   return conf;
 }
@@ -946,7 +947,8 @@ function mostrarVistaResumenBarras() {
     dia: [hoy, hoy],
     semana: [getWeekCustom(hoy, conf.inicioSemana), sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7)],
     mes: [getMonthCustom(hoy, conf.inicioMes), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes)],
-    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC)]
+    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC)],
+    compartido: [getMonthCustom(hoy, conf.inicioCompartido), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioCompartido), 32), conf.inicioCompartido)]
   };
 
   const resumen = {
@@ -964,6 +966,8 @@ function mostrarVistaResumenBarras() {
       resumen.Semana.gasto += g.monto;
     if (fecha >= rangos.mes[0] && fecha < rangos.mes[1]) {
       if (!g.fijo) resumen.Mes.gasto += g.monto;
+    }
+    if (fecha >= rangos.compartido[0] && fecha < rangos.compartido[1]) {      
       if (g.compartido) resumen.Compartido.gasto += g.monto;
     }
     if (g.tdc && fecha >= rangos.tdc[0] && fecha < rangos.tdc[1])
@@ -1160,6 +1164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     limites.inicioSemana = +document.getElementById("inicio-semana").value;
     limites.inicioMes = +document.getElementById("inicio-mes").value;
     limites.inicioTDC = +document.getElementById("inicio-tdc").value;
+    limites.inicioCompartido = +document.getElementById("inicio-compartido").value;
     localStorage.setItem("limites", JSON.stringify(limites));
     volverAPrincipal();
     mostrarVistaResumenBarras();

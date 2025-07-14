@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V40.8</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V41</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -79,7 +79,8 @@
       <label>Límite mensual TDC: <input type="number" id="limite-tdc" required /></label>
       <label>Día inicio de semana (0=D, 1=L...): <input type="number" id="inicio-semana" min="0" max="6" required /></label>
       <label>Día inicio de mes: <input type="number" id="inicio-mes" min="1" max="31" required /></label>
-      <label>Día inicio corte TDC: <input type="number" id="inicio-tdc" min="1" max="31" required /></label>
+      <label>Día inicio TDC: <input type="number" id="inicio-tdc" min="1" max="31" required /></label>
+      <label>Día inicio Compartido: <input type="number" id="inicio-compartido" min="1" max="31" required /></label>
       <button type="submit">Guardar Límites</button>
     </form>
     <button type="button" onclick="volverAPrincipal()">Volver</button>
