@@ -161,7 +161,7 @@ function cargarLimites() {
 
   // Si es un nuevo día, actualiza el límite diario automáticamente
   if (hoy !== ultimaFechaAplicada) {
-    const gastos = JSON.parse(localStorage.getItem("gastos")).filter(g => !g.fijo) || [];
+    const gastos = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
     const limiteCalculado = calcularLimiteDinamicoDiario({
       gastos,
       limiteSemanal: conf.semana,
