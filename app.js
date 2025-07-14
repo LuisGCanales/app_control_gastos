@@ -226,8 +226,9 @@ function agregarGasto(e) {
     ? `${fechaInput}T23:59:00`
     : obtenerFechaHoraLocal();
 
+  const nota = "";
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  gastos.push({ monto, concepto, tdc, compartido, fijo, timestamp });
+  gastos.push({ monto, concepto, tdc, compartido, fijo, timestamp, nota });
   localStorage.setItem("gastos", JSON.stringify(gastos));
 
   // Si viene de gasto fijo: marcar como pagado
@@ -249,14 +250,15 @@ function agregarGasto(e) {
 
 function exportarCSV() {
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  const filas = [["timestamp", "monto", "concepto", "tdc", "compartido", "fijo"],
+  const filas = [["timestamp", "monto", "concepto", "tdc", "compartido", "fijo", "nota"],
     ...gastos.map(g => [
       g.timestamp.replace("T", " "),
       g.monto,
       g.concepto,
       g.tdc ? "Si" : "No",
       g.compartido ? "Si" : "No",
-      g.fijo ? "Si" : "No"
+      g.fijo ? "Si" : "No",
+      g.nota || ""
     ])
   ];
 
@@ -276,14 +278,15 @@ function importarCSV(e) {
   const reader = new FileReader();
   reader.onload = evt => {
     const nuevos = evt.target.result.split("\n").slice(1).map(linea => {
-      const [timestamp, monto, concepto, tdc, compartido, fijo] = linea.split(",");
+      const [timestamp, monto, concepto, tdc, compartido, fijo, nota] = linea.split(",");
       return {
         timestamp: timestamp.trim().replace(" ", "T"),
         monto: Number(monto),
         concepto,
         tdc: (tdc || "").trim() === "Si",
         compartido: (compartido || "").trim() === "Si",
-        fijo: (fijo || "").trim() === "Si"
+        fijo: (fijo || "").trim() === "Si",
+        nota: (nota || "").trim()
       };
     }).filter(g => g.timestamp);
 
@@ -379,7 +382,10 @@ function renderizarTablaGastos() {
     gastosDelDia.forEach(g => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${g.concepto}</td>
+        <td>
+          ${g.concepto}
+          ${g.nota ? `<span title="${g.nota}"> 📝</span>` : ""}
+        </td>
         <td class="${g.monto < 0 ? 'reintegro' : ''}">${formatCurrency(g.monto)}</td>
         <td class="centrado">${g.tdc ? "ꪜ" : ""}</td>
         <td class="centrado">${g.compartido ? "ꪜ" : ""}</td>
@@ -421,6 +427,7 @@ function abrirFormularioEdicion(gasto) {
   document.getElementById("editar-compartido").checked = gasto.compartido;
   document.getElementById("editar-fijo").checked = gasto.fijo || false;
   document.getElementById("editar-fecha").value = gasto.timestamp.slice(0, 10);
+  document.getElementById("editar-nota").value = gasto.nota || "";
   history.pushState({ vista: "modal-edicion" }, "", "#modal-edicion");
 }
 
@@ -1135,7 +1142,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fijo: document.getElementById("editar-fijo").checked,
         timestamp: fecha === fechaOriginal
           ? gastoEditando.timestamp
-          : `${fecha}T23:59:00`
+          : `${fecha}T23:59:00`,
+        nota: document.getElementById("editar-nota").value.trim()
+
       };
       localStorage.setItem("gastos", JSON.stringify(todos));
       cerrarFormularioEdicion();

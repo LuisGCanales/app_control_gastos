@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V35</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V36</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -147,7 +147,10 @@
         <label><input type="checkbox" id="editar-fijo" class="checkbox-minimal" />Fijo</label>
       </div>
       <label>Fecha: <input type="date" id="editar-fecha" required /></label>
-
+      <div class="form-group">
+        <label for="editar-nota">Notas: </label>
+        <textarea id="editar-nota" rows="2" placeholder="Agrega una nota para este gasto (opcional)"></textarea>
+      </div>
       <button type="submit">Guardar cambios</button>
       <button type="button" id="btn-eliminar-gasto" style="margin-top: 1em; background-color: #802020;">🗑 Eliminar</button>
       <button type="button" onclick="cerrarFormularioEdicion()">Cancelar</button>
