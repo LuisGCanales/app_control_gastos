@@ -291,6 +291,29 @@ function importarCSV(e) {
     }).filter(g => g.timestamp);
 
     localStorage.setItem("gastos", JSON.stringify(nuevos));
+
+    // Se recalcula el límite diario dinámico
+    const hoy = toLocalISODate(new Date());
+    const ultimaAplicacion = localStorage.getItem("limites_dia_aplicado");
+
+    if (hoy === ultimaAplicacion) {
+      const conf = JSON.parse(localStorage.getItem("limites"));
+      const gastos = nuevos.filter(g => !g.fijo);
+      console.log("Gastos importados:", gastos);
+
+      const nuevoLimite = calcularLimiteDinamicoDiario({
+        gastos,
+        limiteSemanal: conf.semana,
+        distribucion: distribucionSemanalPorDefecto,
+        inicioSemana: conf.inicioSemana
+      });
+      console.log("Nuevo límite calculado:", nuevoLimite);
+
+      conf.dia = Math.max(0, Math.round(nuevoLimite));
+      localStorage.setItem("limites", JSON.stringify(conf));
+    }
+
+    // Actualizar vista
     mostrarVistaResumenBarras();
     renderizarTablaGastos();
   };
