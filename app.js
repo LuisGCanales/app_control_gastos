@@ -96,10 +96,10 @@ const sumarDias = (fechaStr, dias) => {
 
 
 const distribucionSemanalPorDefecto = {
-  0: 0,        // Domingo        0 %
+  0: 0.5 / 3,        // Domingo        0 %
   1: 0.4 / 3,  // Lunes       13.3 %
   2: 0.4 / 3,  // Martes      13.3 %
-  3: 0.5 / 3,  // Miércoles   16.7 %
+  3: 0,  // Miércoles   16.7 %
   4: 0.4 / 3,  // Jueves      13.3 %
   5: 0.8 / 3,  // Viernes     26.7 %
   6: 0.5 / 3   // Sábado      16.7 %
