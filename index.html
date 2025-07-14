@@ -166,6 +166,8 @@
       <label>Concepto: <input type="text" id="nuevo-fijo-concepto" required /></label>
       <label>Monto: <input type="number" id="nuevo-fijo-monto" step="0.01" required /></label>
       <label>Fecha límite: <input type="date" id="nuevo-fijo-fecha" required /></label>
+      <label for="nota-fijo">Nota (opcional):</label>
+      <textarea id="nota-fijo" rows="2" placeholder="Agrega una nota"></textarea>
       <button type="submit">Agregar</button>
     </form>
     <table id="tabla-fijos-pendientes" style="margin-top: 2em;">
@@ -209,6 +211,8 @@
       <label>Concepto: <input type="text" id="editar-fijo-concepto" required /></label>
       <label>Monto: <input type="number" id="editar-fijo-monto" step="0.01" required /></label>
       <label>Fecha límite: <input type="date" id="editar-fijo-fecha" required /></label>
+      <label for="editar-fijo-nota">Nota: </label>
+      <textarea id="editar-fijo-nota" rows="2" placeholder="Agrega una nota (opcional)"></textarea>
       <button type="submit">Guardar cambios</button>
       <div style="display: flex; gap: 1em; justify-content: space-between; margin-top: 1em;">
         <button type="button" id="btn-pagar-fijo" style="background-color: #1c5530;">✅ Pagar</button>

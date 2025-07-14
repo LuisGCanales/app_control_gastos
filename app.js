@@ -498,7 +498,10 @@ function renderizarFijosPendientes() {
       const tr = document.createElement("tr");
       tr.className = "fila-fijo";
       tr.innerHTML = `
-        <td>${g.concepto}</td>
+        <td>
+          ${g.concepto}
+          ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast('${g.nota.replace(/'/g, "\\'")}')"> 📝</span>` : ""}
+        </td>
         <td>${formatCurrency(g.monto)}</td>
         <td class="estado ${g.estado}">${estadoEmoji(g.estado)}</td>
         <td class="centrado">
@@ -532,6 +535,7 @@ function abrirEdicionFijo(idx) {
   document.getElementById("editar-fijo-concepto").value = g.concepto;
   document.getElementById("editar-fijo-monto").value = g.monto;
   document.getElementById("editar-fijo-fecha").value = g.fecha;
+  document.getElementById("editar-fijo-nota").value = g.nota || "";
   document.getElementById("editar-fijo").dataset.idx = idx;
 
   // Mostrar botón correspondiente según el estado
@@ -580,12 +584,13 @@ function cerrarModalPagoFijo() {
 function exportarFijosCSV() {
   const fijos = obtenerFijosPendientes();
   const filas = [
-    ["concepto", "monto", "fecha", "estado"],
+    ["concepto", "monto", "fecha", "estado", "nota"],
     ...fijos.map(g => [
       g.concepto,
       g.monto,
       g.fecha,
-      g.estado
+      g.estado,
+      g.nota || ""
     ])
   ];
 
@@ -607,12 +612,13 @@ function importarFijosCSV(e) {
       .split("\n")
       .slice(1) // omitir encabezado
       .map(linea => {
-        const [concepto, monto, fecha, estado] = linea.split(",");
+        const [concepto, monto, fecha, estado, nota] = linea.split(",");
         return {
           concepto: concepto?.trim() ?? "",
           monto: +monto,
           fecha: fecha?.trim() ?? "",
-          estado: estado?.trim() ?? "pendiente"
+          estado: estado?.trim() ?? "pendiente",
+          nota: nota?.trim() ?? ""
         };
       }).filter(g => g.concepto && g.fecha);
 
@@ -1074,11 +1080,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!concepto || !monto) return;
 
     const fijos = obtenerFijosPendientes();
+    const nota = document.getElementById("nota-fijo").value.trim();
+
     fijos.push({
       concepto,
       monto,
       fecha: document.getElementById("nuevo-fijo-fecha").value,
-      estado: "pendiente"
+      estado: "pendiente",
+      nota
     });
 
     guardarFijosPendientes(fijos);
@@ -1100,7 +1109,9 @@ document.addEventListener("DOMContentLoaded", () => {
       concepto: document.getElementById("editar-fijo-concepto").value.trim(),
       monto: +document.getElementById("editar-fijo-monto").value,
       fecha: document.getElementById("editar-fijo-fecha").value,
-      estado: fijos[fijoEditandoIdx].estado
+      estado: fijos[fijoEditandoIdx].estado,
+      nota: document.getElementById("editar-fijo-nota").value.trim() || ""
+
     };
 
     guardarFijosPendientes(fijos);
