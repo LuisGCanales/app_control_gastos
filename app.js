@@ -248,17 +248,50 @@ function agregarGasto(e) {
   volverAPrincipal();
 }
 
+// Usar comillas en campos que puedan contener comas para evitar conflictos con
+// la estructura del CSV
+function escaparCampoCSV(campo) {
+  if (campo == null) return "";
+  const str = String(campo).replaceAll('"', '""');
+  return str.includes(",") || str.includes('"') ? `"${str}"` : str;
+}
+
+function parsearLineaCSV(linea) {
+  const resultado = [];
+  let valor = "";
+  let enComillas = false;
+
+  for (let i = 0; i < linea.length; i++) {
+    const char = linea[i];
+    const sig = linea[i + 1];
+
+    if (char === '"' && enComillas && sig === '"') {
+      valor += '"';
+      i++; // saltar comilla doble
+    } else if (char === '"') {
+      enComillas = !enComillas;
+    } else if (char === "," && !enComillas) {
+      resultado.push(valor);
+      valor = "";
+    } else {
+      valor += char;
+    }
+  }
+  resultado.push(valor); // último valor
+  return resultado;
+}
+
 function exportarCSV() {
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   const filas = [["timestamp", "monto", "concepto", "tdc", "compartido", "fijo", "nota"],
     ...gastos.map(g => [
       g.timestamp.replace("T", " "),
       g.monto,
-      g.concepto,
+      escaparCampoCSV(g.concepto),
       g.tdc ? "Si" : "No",
       g.compartido ? "Si" : "No",
       g.fijo ? "Si" : "No",
-      g.nota || ""
+      escaparCampoCSV(g.nota) || ""
     ])
   ];
 
@@ -278,7 +311,7 @@ function importarCSV(e) {
   const reader = new FileReader();
   reader.onload = evt => {
     const nuevos = evt.target.result.split("\n").slice(1).map(linea => {
-      const [timestamp, monto, concepto, tdc, compartido, fijo, nota] = linea.split(",");
+      const [timestamp, monto, concepto, tdc, compartido, fijo, nota] = parsearLineaCSV(linea);
       return {
         timestamp: timestamp.trim().replace(" ", "T"),
         monto: Number(monto),
@@ -633,11 +666,11 @@ function exportarFijosCSV() {
   const filas = [
     ["concepto", "monto", "fecha", "estado", "nota"],
     ...fijos.map(g => [
-      g.concepto,
+      escaparCampoCSV(g.concepto),
       g.monto,
       g.fecha,
       g.estado,
-      g.nota || ""
+      escaparCampoCSV(g.nota) || ""
     ])
   ];
 
@@ -659,7 +692,7 @@ function importarFijosCSV(e) {
       .split("\n")
       .slice(1) // omitir encabezado
       .map(linea => {
-        const [concepto, monto, fecha, estado, nota] = linea.split(",");
+        const [concepto, monto, fecha, estado, nota] = parsearLineaCSV(linea);
         return {
           concepto: concepto?.trim() ?? "",
           monto: +monto,
