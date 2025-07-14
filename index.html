@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V40.7</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V40.8</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -64,7 +64,7 @@
     <div style="margin-top: 1em;">
       <button type="button" onclick="mostrarConfiguracion()">⚙️ Configuración</button>
       <button type="button" onclick="mostrarTabla()">Ver todos los gastos</button>
-      <button type="button" onclick="mostrarFijosPendientes()">💡 Gastos Fijos Pendientes</button>
+      <button type="button" onclick="mostrarFijosPendientes()">💡 Gastos Fijos</button>
     </div>
   </main>
 
@@ -166,7 +166,7 @@
 
   <!-- === Vista de Gastos Fijos Pendientes === -->
   <section class="container" id="vista-fijos-pendientes" style="display: none;">
-    <h2>Gastos Fijos Pendientes</h2>
+    <h2>Gastos Fijos</h2>
 
     <form id="form-fijos-pendientes">
       <label>Concepto: <input type="text" id="nuevo-fijo-concepto" required /></label>
