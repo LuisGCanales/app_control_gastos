@@ -114,28 +114,21 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
   const offset = (diaHoy - inicioSemana + 7) % 7;
   inicio.setDate(hoy.getDate() - offset);
   inicio.setHours(0, 0, 0, 0);
-  console.log("→ Inicio semana:", inicio);
 
   // Días en orden de la semana desde inicio
   const diasSemana = [...Array(7)].map((_, i) => (inicio.getDay() + i) % 7);
-  console.log("→ Días semana:", diasSemana);
 
   // Día actual en índice relativo al ciclo semanal
   const hoyRelativo = (diaHoy - inicioSemana + 7) % 7;
-  console.log("→ Hoy relativo:", hoyRelativo);
 
   const diasFaltantes = diasSemana.slice(hoyRelativo);
-  console.log("→ Días faltantes:", diasFaltantes);
 
   // Filtrar gastos de esta semana
   const fechaInicioISO = toLocalISODate(inicio);
-  console.log("→ Fecha Inicio:", fechaInicioISO);
 
   const fechaFinISO = toLocalISODate(new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 7));
-  console.log("→ Fecha Final:", fechaFinISO);
 
   const gastosSemana = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO);
-  console.log("→ Gastos Semana:", gastosSemana);
 
   // Agrupar gasto por día de la semana
   const gastoPorDia = {};
@@ -144,22 +137,17 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
     const dia = fecha.getDay();
     gastoPorDia[dia] = (gastoPorDia[dia] || 0) + g.monto;
   });
-  console.log("→ Gastos por día:", gastoPorDia);
 
   // Gasto acumulado hasta ayer
   const gastoAcumulado = diasSemana
     .slice(0, hoyRelativo) // días anteriores
     .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
-  console.log("→ Gastos Acumulado hasta ayer:", gastoAcumulado);
 
   const restante = limiteSemanal - gastoAcumulado;
-  console.log("→ Restante:", restante);
 
   const sumaPorcentajesRestantes = diasFaltantes.reduce((acc, d) => acc + distribucion[d], 0);
-  console.log("→ Suma Porcentajes:", sumaPorcentajesRestantes);
 
   const limiteDiario = (distribucion[diaHoy] / sumaPorcentajesRestantes) * restante;
-  console.log("→ Limite Diario:", limiteDiario);
 
   return limiteDiario;
 }
