@@ -153,7 +153,7 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
 }
 
 function cargarLimites() {
-  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 1, inicioMes: 1, inicioTDC: 12 };
+  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 6, inicioMes: 12, inicioTDC: 12 };
   const hoy = getToday()
   const ultimaFechaAplicada = localStorage.getItem("limites_dia_aplicado");
 
