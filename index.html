@@ -72,10 +72,10 @@
   <section class="container" id="vista-configuracion" style="display: none;">
     <h2>Configuración de Límites</h2>
     <form id="config-form">
-      <label>Límite diario: <input type="number" id="limite-dia" required /></label>
-      <label>Límite semanal: <input type="number" id="limite-semana" required /></label>
-      <label>Límite mensual: <input type="number" id="limite-mes" required /></label>
-      <label>Límite mensual compartido: <input type="number" id="limite-compartido" required /></label>
+      <label>Límite diario: <input type="number" id="limite-dia" step="0.01" required /></label>
+      <label>Límite semanal: <input type="number" id="limite-semana" step="0.01" required /></label>
+      <label>Límite mensual: <input type="number" id="limite-mes" step="0.01" required /></label>
+      <label>Límite mensual compartido: <input type="number" id="limite-compartido" step="0.01" required /></label>
       <label>Límite mensual TDC: <input type="number" id="limite-tdc" required /></label>
       <label>Día inicio de semana (0=D, 1=L...): <input type="number" id="inicio-semana" min="0" max="6" required /></label>
       <label>Día inicio de mes: <input type="number" id="inicio-mes" min="1" max="31" required /></label>
