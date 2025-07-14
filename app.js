@@ -315,6 +315,7 @@ function mostrarTabla() {
 
   // Renderiza y asigna eventos
   renderizarTablaGastos();
+  actualizarEtiquetaSwitchTabla(document.getElementById("switch-tabla-periodo-actual").checked);
   document.getElementById("filtro-fecha").addEventListener("input", renderizarTablaGastos);
   document.getElementById("filtro-fijos").addEventListener("change", renderizarTablaGastos);
   document.getElementById("filtro-variables").addEventListener("change", renderizarTablaGastos);
@@ -332,7 +333,20 @@ function mostrarTabla() {
 }
 
 function renderizarTablaGastos() {
-  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+  const mostrarPeriodoActual = document.getElementById("switch-tabla-periodo-actual")?.checked ?? false;
+  const hoy = getToday();
+  const conf = cargarLimites();
+  const inicioPeriodo = getMonthCustom(hoy, conf.inicioMes);
+  const finPeriodo = getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes);
+
+  let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+
+  if (mostrarPeriodoActual) {
+    gastos = gastos.filter(g => {
+      const fechaLocal = toLocalISODate(new Date(g.timestamp));
+      return fechaLocal >= inicioPeriodo && fechaLocal < finPeriodo;
+    });
+  }
 
   // Filtros
   const fFecha = document.getElementById("filtro-fecha").value;
@@ -1058,6 +1072,18 @@ function mostrarNotaToast(nota) {
   }, 3000);
 }
 
+function actualizarEtiquetaSwitchTabla(periodoActualActivo) {
+  const label = document.getElementById("switch-label-tabla");
+  if (periodoActualActivo) {
+    label.innerHTML = `
+      <span class="strike">Histórico</span> /
+      <span class="bold">Periodo actual</span>`;
+  } else {
+    label.innerHTML = `
+      <span class="bold">Histórico</span> /
+      <span class="strike">Periodo actual</span>`;
+  }
+}
 
 // === INICIALIZACIÓN ===
 
@@ -1332,6 +1358,12 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     if (graficaVisible) mostrarVistaGraficas();
     if (resumenVisible) mostrarVistaResumenBarras();
+  });
+
+  document.getElementById("switch-tabla-periodo-actual").addEventListener("change", () => {
+    const checked = document.getElementById("switch-tabla-periodo-actual").checked;
+    actualizarEtiquetaSwitchTabla(checked);
+    renderizarTablaGastos(); // vuelve a renderizar filtrando
   });
 
 });
