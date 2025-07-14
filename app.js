@@ -384,7 +384,7 @@ function renderizarTablaGastos() {
       tr.innerHTML = `
         <td>
           ${g.concepto}
-          ${g.nota ? `<span title="${g.nota}"> 📝</span>` : ""}
+          ${g.nota ? `<span class="nota-icono" onclick="alert('${g.nota.replace(/'/g, "\\'")}')">📝</span>` : ""}
         </td>
         <td class="${g.monto < 0 ? 'reintegro' : ''}">${formatCurrency(g.monto)}</td>
         <td class="centrado">${g.tdc ? "ꪜ" : ""}</td>
