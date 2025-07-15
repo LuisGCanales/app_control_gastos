@@ -366,7 +366,8 @@ button:hover {
 
 
 #tabla-gastos,
-#tabla-fijos-pendientes {
+#tabla-fijos-pendientes,
+#tabla-liquidez {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1em;
@@ -375,13 +376,14 @@ button:hover {
 }
 
 #tabla-gastos th, #tabla-gastos td,
-#tabla-fijos-pendientes th, #tabla-fijos-pendientes td {
+#tabla-fijos-pendientes th, #tabla-fijos-pendientes td,
+#tabla-liquidez th, #tabla-liquidez td {
   padding: 0.5em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   text-align: left;
 }
 
-#tabla-gastos th, #tabla-fijos-pendientes th {
+#tabla-gastos th, #tabla-fijos-pendientes th, #tabla-liquidez th {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -556,4 +558,39 @@ button:hover {
   display: flex;
   justify-content: space-between;
   color: #f2f2f2;
+}
+
+#vista-liquidez {
+  min-height: 100vh; /* ocupa toda la pantalla */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* o 'space-between' si prefieres separar la gráfica y los botones */
+}
+
+#vista-liquidez {
+  background-color: rgba(15, 15, 15, 0.75);
+  border-radius: 12px;
+  padding: 2em;
+}
+
+#grafica-liquidez {
+  width: 80vw; /* ocupa toda la pantalla */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* o 'space-between' si prefieres separar la gráfica y los botones */
+}
+
+
+.tabla-liquidez button {
+  background: transparent;
+  border: none;
+  font-size: 1.2em;
+  color: #eee;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tabla-liquidez button:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
 }

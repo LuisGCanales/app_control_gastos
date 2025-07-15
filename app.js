@@ -1228,13 +1228,15 @@ function renderizarGraficaLiquidez() {
   const ctx = document.getElementById("grafica-liquidez").getContext("2d");
   if (graficoLiquidez) graficoLiquidez.destroy();
 
-  colors = ["#09daffff", "#D2C1B6", "#04ab79ff"]
+  colors = ["#04ab79ff", "#D2C1B6", "#09daffff", "#d0184cff"]
 
   graficoLiquidez = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Liquidez'],
-      datasets: liquidez.map((item, i) => ({
+      labels: ['Monto ($)'],
+      datasets:  [...liquidez]
+      .sort((a, b) => b.monto - a.monto) 
+      .map((item, i) => ({
         label: item.categoria,
         data: [item.monto],
         backgroundColor: colors[i]
@@ -1242,24 +1244,38 @@ function renderizarGraficaLiquidez() {
     },
     options: {
       indexAxis: 'x',
-      responsive: true,
+      responsive: false,      
+      layout: {
+        padding: {
+          right: 10,
+          left: -5
+        }
+      },
       plugins: {
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.x)}`
+            label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`
           }
         },
-        legend: { position: 'bottom' },
+        legend: {
+          position: 'right',
+          align: 'center',
+          labels: {
+            boxWidth: 10,
+            padding: 7
+          }
+        },
         datalabels: {
           color: '#fff',
           font: { weight: 'bold' },
-          formatter: v => `$${v.toLocaleString("es-MX", {minimumFractionDigits: 2})}`
+          formatter: value => value > 0
+            ? `$${value.toLocaleString("es-MX", { minimumFractionDigits: 0 })}`
+            : ''
         }
       },
       scales: {
         x: {
-          stacked: true,
-          title: { display: true, text: "Monto ($)" }
+          stacked: true
         },
         y: { stacked: true }
       }
@@ -1272,7 +1288,7 @@ function eliminarLiquidez(idx) {
   const liquidez = obtenerLiquidez();
   liquidez.splice(idx, 1);
   guardarLiquidez(liquidez);
-  renderizarLiquidez();
+  renderizarGraficaLiquidez();
 }
 
 // === INICIALIZACIÓN ===
