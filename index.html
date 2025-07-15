@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V42.4</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V42.5</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -232,8 +232,8 @@
     </form>
   </section>
 
-  <section id="modal-pago-fijo" class="modal" style="display: none;">
-    <form id="form-pago-fijo" class="formulario container">
+  <section id="modal-pago-fijo" class="container" style="display: none;">
+    <form id="form-pago-fijo">
       <h2>Registrar pago de gasto fijo</h2>
 
       <label>Concepto:
@@ -254,7 +254,10 @@
       </label>
 
       <input type="date" id="pago-fijo-fecha-personalizada" />
-
+      <div class="form-group">
+        <label for="pago-fijo-nota">Notas: </label>
+        <textarea id="pago-fijo-nota" rows="2" placeholder="Agrega una nota"></textarea>
+      </div>
       <div class="acciones-modal">
         <button type="submit">Agregar pago</button>
         <button type="button" onclick="cerrarModalPagoFijo()">Cancelar</button>

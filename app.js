@@ -1313,7 +1313,8 @@ document.addEventListener("DOMContentLoaded", () => {
       g.concepto === gastoEditando.concepto &&
       g.monto === gastoEditando.monto &&
       g.tdc === gastoEditando.tdc &&
-      g.compartido === gastoEditando.compartido
+      g.compartido === gastoEditando.compartido &&
+      g.nota === gastoEditando.nota
     );
     if (idx !== -1) {
       todos.splice(idx, 1);
@@ -1351,6 +1352,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     document.getElementById("pago-fijo-compartido").checked = false;
     document.getElementById("pago-fijo-activar-fecha").checked = false;
     document.getElementById("pago-fijo-fecha-personalizada").value = "";
+    document.getElementById("pago-fijo-nota").value = fijo.nota || "";
 
     document.getElementById("form-pago-fijo").dataset.fijoRelacionado = idx;
 
@@ -1369,13 +1371,14 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     const compartido = document.getElementById("pago-fijo-compartido").checked;
     const usarFecha = document.getElementById("pago-fijo-activar-fecha").checked;
     const fechaInput = document.getElementById("pago-fijo-fecha-personalizada").value;
+    const nota = document.getElementById("pago-fijo-nota").value.trim();
 
     const timestamp = usarFecha && fechaInput
       ? `${fechaInput}T23:59:00`
       : obtenerFechaHoraLocal();
 
     const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-    gastos.push({ concepto, monto, tdc, compartido, fijo: true, timestamp });
+    gastos.push({ concepto, monto, tdc, compartido, fijo: true, timestamp, nota });
     localStorage.setItem("gastos", JSON.stringify(gastos));
 
     // Marcar gasto fijo como pagado
