@@ -203,7 +203,7 @@ function mostrarFijosPendientes() {
 }
 
 const volverAPrincipal = () => {
-  ["vista-configuracion", "vista-tabla", "vista-fijos-pendientes", "modal-edicion-fijo", "modal-edicion", "vista-graficas"].forEach(id => {
+  ["vista-configuracion", "vista-tabla", "vista-fijos-pendientes", "modal-edicion-fijo", "modal-edicion", "vista-graficas", "vista-liquidez"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
   });
@@ -1173,6 +1173,108 @@ function actualizarEtiquetaSwitchTabla(periodoActualActivo) {
   }
 }
 
+// Vista de liquidez
+
+function obtenerLiquidez() {
+  return JSON.parse(localStorage.getItem("liquidez")) || [];
+}
+
+function guardarLiquidez(arr) {
+  localStorage.setItem("liquidez", JSON.stringify(arr));
+}
+
+function mostrarVistaLiquidez() {
+  document.getElementById("vista-principal").style.display = "none";
+  document.getElementById("resumen").style.display = "none";
+  document.getElementById("vista-liquidez").style.display = "block";
+  renderizarGraficaLiquidez();
+  history.pushState({ vista: "vista-liquidez" }, "", "#vista-liquidez");
+}
+
+function abrirModalLiquidez() {
+  document.getElementById("vista-liquidez").style.display = "none";
+  document.getElementById("modal-liquidez").style.display = "block";
+  renderizarTablaLiquidez();
+}
+
+function cerrarModalLiquidez() {
+  document.getElementById("modal-liquidez").style.display = "none";
+  document.getElementById("vista-liquidez").style.display = "block";
+}
+
+function renderizarTablaLiquidez() {
+  const liquidez = obtenerLiquidez();
+  const tbody = document.querySelector("#tabla-liquidez tbody");
+  tbody.innerHTML = "";
+
+  liquidez.forEach((item, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.categoria}</td>
+      <td>${formatCurrency(item.monto)}</td>
+      <td><button onclick="eliminarLiquidez(${idx})">🗑</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+let graficoLiquidez;
+
+function renderizarGraficaLiquidez() {
+  const liquidez = obtenerLiquidez();
+  const total = liquidez.reduce((acc, el) => acc + el.monto, 0);
+  document.getElementById("total-liquidez").textContent = `Total: ${formatCurrency(total)}`;
+
+  const ctx = document.getElementById("grafica-liquidez").getContext("2d");
+  if (graficoLiquidez) graficoLiquidez.destroy();
+
+  colors = ["#09daffff", "#D2C1B6", "#04ab79ff"]
+
+  graficoLiquidez = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Liquidez'],
+      datasets: liquidez.map((item, i) => ({
+        label: item.categoria,
+        data: [item.monto],
+        backgroundColor: colors[i]
+      }))
+    },
+    options: {
+      indexAxis: 'x',
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.x)}`
+          }
+        },
+        legend: { position: 'bottom' },
+        datalabels: {
+          color: '#fff',
+          font: { weight: 'bold' },
+          formatter: v => `$${v.toLocaleString("es-MX", {minimumFractionDigits: 2})}`
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          title: { display: true, text: "Monto ($)" }
+        },
+        y: { stacked: true }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+function eliminarLiquidez(idx) {
+  const liquidez = obtenerLiquidez();
+  liquidez.splice(idx, 1);
+  guardarLiquidez(liquidez);
+  renderizarLiquidez();
+}
+
 // === INICIALIZACIÓN ===
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1456,6 +1558,28 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     const checked = document.getElementById("switch-tabla-periodo-actual").checked;
     actualizarEtiquetaSwitchTabla(checked);
     renderizarTablaGastos(); // vuelve a renderizar filtrando
+  });
+
+  // Vista de liquidez
+  document.getElementById("form-liquidez").addEventListener("submit", e => {
+    e.preventDefault();
+    const categoria = document.getElementById("nueva-categoria").value.trim();
+    const monto = +document.getElementById("monto-categoria").value;
+    if (!categoria || isNaN(monto)) return;
+
+    const liquidez = obtenerLiquidez();
+    const idx = liquidez.findIndex(el => el.categoria.toLowerCase() === categoria.toLowerCase());
+
+    if (idx !== -1) {
+      liquidez[idx].monto = monto;
+    } else {
+      liquidez.push({ categoria, monto });
+    }
+
+    guardarLiquidez(liquidez);
+    document.getElementById("form-liquidez").reset();
+    renderizarTablaLiquidez();
+    renderizarGraficaLiquidez(); // actualiza gráfica
   });
 
 });

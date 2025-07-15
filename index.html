@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V42.5</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V43</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -65,6 +65,7 @@
       <button type="button" onclick="mostrarConfiguracion()">⚙️ Configuración</button>
       <button type="button" onclick="mostrarTabla()">Ver todos los gastos</button>
       <button type="button" onclick="mostrarFijosPendientes()">💡 Gastos Fijos</button>
+      <button type="button" onclick="mostrarVistaLiquidez()">💰 Liquidez</button>
     </div>
   </main>
 
@@ -283,6 +284,39 @@
   </section>
 
   <div id="tooltip-nota" class="tooltip-nota" style="display: none;"></div>
+
+  <!-- Vista de liquidez -->
+  <section class="container" id="vista-liquidez" style="display: none;">
+    <h2>Liquidez</h2>
+    <div id="total-liquidez" style="margin-top: 1em; font-weight: bold; text-align: center;"></div>
+    <canvas id="grafica-liquidez" style="margin-top: 2em;"></canvas>
+    <div style="margin-bottom: 1em; text-align: center;">
+      <button onclick="abrirModalLiquidez()">➕ Agregar / Editar Categorías</button>
+    </div>
+    <button onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+  <!-- Modal de edición de liquidez -->
+  <section class="container" id="modal-liquidez" style="display: none;">
+    <h2>Editar Liquidez</h2>
+
+    <form id="form-liquidez">
+      <label>Categoría:
+        <input type="text" id="nueva-categoria" required placeholder="Ej. Efectivo, BBVA" />
+      </label>
+      <label>Monto actual:
+        <input type="number" id="monto-categoria" step="0.01" required />
+      </label>
+      <button type="submit">Guardar</button>
+    </form>
+
+    <table id="tabla-liquidez" style="margin-top: 2em;">
+      <thead><tr><th>Categoría</th><th>Monto</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <button onclick="cerrarModalLiquidez()">Cerrar</button>
+  </section>
 
   <!-- Scripts -->
   <script src="app.js"></script>
