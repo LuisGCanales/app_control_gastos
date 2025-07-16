@@ -105,6 +105,78 @@ const distribucionSemanalPorDefecto = {
   6: 0.5 / 3   // Sábado      16.7 %
 };
 
+function calcularLimiteMensualDinamico() {
+  const hoy = getToday();
+  const liquidez = obtenerLiquidez();
+  const totalLiquidez = liquidez.reduce((acc, item) => acc + item.monto, 0);
+
+  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+  const limites = cargarLimites(); // para obtener inicio de mes
+
+  const fechaInicioPeriodo = getMonthCustom(hoy, limites.inicioMes);
+
+  const variables = gastos.filter(g => !g.fijo && g.timestamp.slice(0, 10) >= fechaInicioPeriodo);
+  const fijosPagados = gastos.filter(g => g.fijo && g.timestamp.slice(0, 10) >= fechaInicioPeriodo);
+  const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
+
+  const totalVariables = variables.reduce((acc, g) => acc + g.monto, 0);
+  const totalFijosPagados = fijosPagados.reduce((acc, g) => acc + g.monto, 0);
+  const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
+
+  return Math.max(0, totalLiquidez - totalFijosPendientes);
+}
+
+function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
+  const diasResiduales = [];
+
+  const diasCompletos = Math.floor(totalDiasPeriodo / 7);
+  const diasTotales = totalDiasPeriodo;
+
+  for (let i = diasCompletos * 7; i < diasTotales; i++) {
+    const fecha = crearFechaLocal(fechaInicioISO);
+    fecha.setDate(fecha.getDate() + i);
+    diasResiduales.push(fecha.getDay()); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+  }
+
+  return diasResiduales;
+}
+
+function actualizarLimitesDesdeLiquidez() {
+  
+  const limites = cargarLimites();
+  const distribucion = distribucionSemanalPorDefecto;
+  
+  const fechaInicio = getToday();
+  
+  const fechaFin = getMonthCustom(sumarDias(fechaInicio, 32), limites.inicioMes);
+  
+  const diasPeriodo = (crearFechaLocal(fechaFin) - crearFechaLocal(fechaInicio)) / (1000 * 60 * 60 * 24);
+  const semanasCompletas = Math.floor(diasPeriodo / 7); 
+  const diasResiduales = obtenerDiasResiduales(fechaInicio, diasPeriodo);
+  const sumaProporcionesResiduales = diasResiduales.reduce((acc, d) => acc + distribucion[d], 0);  
+  const liquidezDisponible = calcularLimiteMensualDinamico(); // ← nueva función
+  const divisor = semanasCompletas + sumaProporcionesResiduales;    
+  const limiteSemanal = liquidezDisponible / divisor;
+  
+  // Actualiza y guarda los nuevos límites
+  limites.mes = Math.round(liquidezDisponible);
+  limites.semana = Math.round(limiteSemanal);
+  localStorage.setItem("limites", JSON.stringify(limites));
+
+  // Forzar recálculo de límite diario hoy
+  localStorage.removeItem("limites_dia_aplicado");
+  cargarLimites();
+  mostrarVistaResumenBarras();
+}
+
+function actualizarLimitesDesdeLiquidezConFeedback() {
+  actualizarLimitesDesdeLiquidez();
+  const msg = document.getElementById("limites-feedback");
+  msg.textContent = "✅ Límites actualizados";
+  setTimeout(() => msg.textContent = "", 2500);
+}
+
+
 function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, inicioSemana }) {
   const hoy = new Date();
   const diaHoy = hoy.getDay();

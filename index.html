@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V43.1</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V44</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -82,6 +82,12 @@
       <label>Día inicio de mes: <input type="number" id="inicio-mes" min="1" max="31" required /></label>
       <label>Día inicio TDC: <input type="number" id="inicio-tdc" min="1" max="31" required /></label>
       <label>Día inicio Compartido: <input type="number" id="inicio-compartido" min="1" max="31" required /></label>
+      <div style="margin-top: 1em;">
+        <button type="button" onclick="actualizarLimitesDesdeLiquidezConFeedback()">
+          📊 Calcular límites dinámicos
+        </button>
+        <span id="limites-feedback" style="margin-left: 1em; color: #80d4aa;"></span>
+      </div>
       <button type="submit">Guardar Límites</button>
     </form>
     <button type="button" onclick="volverAPrincipal()">Volver</button>
