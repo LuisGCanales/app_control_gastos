@@ -349,7 +349,7 @@ function importarCSV(e) {
     localStorage.setItem("gastos", JSON.stringify(nuevos));
 
     // Se recalcula el límite diario dinámico
-    const hoy = toLocalISODate(new Date());
+    const hoy = getToday();
     const ultimaAplicacion = localStorage.getItem("limites_dia_aplicado");
 
     if (hoy === ultimaAplicacion) {
