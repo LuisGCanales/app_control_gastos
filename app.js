@@ -1303,7 +1303,7 @@ function renderizarGraficaLiquidez() {
   const ctx = document.getElementById("grafica-liquidez").getContext("2d");
   if (graficoLiquidez) graficoLiquidez.destroy();
 
-  colors = ["#04ab79ff", "#D2C1B6", "#09daffff", "#d0184cff"]
+  colors = ["#04ab79ff", "#D2C1B6", "#09daffff", "#d0184cff", "#28005cff"]
 
   graficoLiquidez = new Chart(ctx, {
     type: 'bar',
