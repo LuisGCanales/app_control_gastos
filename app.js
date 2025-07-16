@@ -875,13 +875,8 @@ function mostrarVistaGraficas() {
   const promedioMovil = fechasISO.map(f => promedioMovilCompleto[fechasISOcompleto.indexOf(f)]);
 
   // Límite diario ajustado
-  const inicioMes = inicioPeriodo;
-  const finMes = finPeriodo;
-  const diasMes = (new Date(finMes) - new Date(inicioMes)) / (1000 * 60 * 60 * 24);
-  const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
-  const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
-  const limiteMensualAjustado = conf.mes - totalFijosPendientes;
-  const limiteDiarioAjustado = limiteMensualAjustado / diasMes;
+  const limiteSemanal = conf.semana;
+  const limiteDiarioAjustado = limiteSemanal / 7;
 
   const dataLimite = [
     { x: fechas[0], y: limiteDiarioAjustado },
