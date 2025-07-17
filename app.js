@@ -105,6 +105,7 @@ const distribucionSemanalPorDefecto = {
   6: 0.5 / 3   // Sábado      16.7 %
 };
 
+// Liquidez disponible contando sólo los gastos de hasta un día anterior
 function calcularLiquidezDisponible() {
   const liquidez = obtenerLiquidez();
   const totalLiquidez = liquidez.reduce((acc, item) => acc + item.monto, 0);
@@ -113,7 +114,11 @@ function calcularLiquidezDisponible() {
 
   const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
 
-  return Math.max(0, totalLiquidez - totalFijosPendientes);
+  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+  const gastosDia = gastos.filter(g => g.timestamp.slice(0, 10) === getToday());
+  const totalGastosDia = gastosDia.reduce((acc, g) => acc + g.monto, 0);
+  
+  return Math.max(0, totalLiquidez - totalFijosPendientes + totalGastosDia);
 }
 
 function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
