@@ -94,16 +94,31 @@ const sumarDias = (fechaStr, dias) => {
 
 // === CONFIGURACIÓN ===
 
+// Distribución anterior
+
+// const distribucionSemanalPorDefecto = {
+//   0: 0,        // Domingo        0 %
+//   1: 0.4 / 3,  // Lunes       13.3 %
+//   2: 0.4 / 3,  // Martes      13.3 %
+//   3: 0.5 / 3,  // Miércoles   16.7 %
+//   4: 0.4 / 3,  // Jueves      13.3 %
+//   5: 0.8 / 3,  // Viernes     26.7 %
+//   6: 0.5 / 3   // Sábado      16.7 %
+// };
+
+// Distribución actual
 
 const distribucionSemanalPorDefecto = {
-  0: 0,        // Domingo        0 %
-  1: 0.4 / 3,  // Lunes       13.3 %
-  2: 0.4 / 3,  // Martes      13.3 %
-  3: 0.5 / 3,  // Miércoles   16.7 %
-  4: 0.4 / 3,  // Jueves      13.3 %
-  5: 0.8 / 3,  // Viernes     26.7 %
-  6: 0.5 / 3   // Sábado      16.7 %
+  0: 0,        // Domingo         0 %
+  1: 0.1404,   // Lunes       14.04 %
+  2: 0.1404,   // Martes      14.04 %
+  3: 0.1579,   // Miércoles   15.79 %
+  4: 0.1404,   // Jueves      14.04 %
+  5: 0.263,    // Viernes     26.3  %
+  6: 0.1579    // Sábado      15.79 %
 };
+
+
 
 // Liquidez disponible contando sólo los gastos de hasta un día anterior
 function calcularLiquidezDisponible() {
