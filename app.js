@@ -130,10 +130,11 @@ function calcularLiquidezDisponible() {
   const totalFijosPendientes = fijosPendientes.reduce((acc, g) => acc + g.monto, 0);
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  const gastosDia = gastos.filter(g => g.timestamp.slice(0, 10) === getToday());
-  const totalGastosDia = gastosDia.reduce((acc, g) => acc + g.monto, 0);
+  const gastosVariables = gastos.filter(g => !g.fijo);
+  const gastosVariablesDia = gastosVariables.filter(g => g.timestamp.slice(0, 10) === getToday());
+  const totalGastosVarDia = gastosVariablesDia.reduce((acc, g) => acc + g.monto, 0);
   
-  return Math.max(0, totalLiquidez - totalFijosPendientes + totalGastosDia);
+  return Math.max(0, totalLiquidez - totalFijosPendientes + totalGastosVarDia);
 }
 
 function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
@@ -150,7 +151,7 @@ function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
 
   return diasResiduales;
 }
-
+ 
 function actualizarLimitesDesdeLiquidez() {
   
   const limites = cargarLimites();
