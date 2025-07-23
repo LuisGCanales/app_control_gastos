@@ -110,12 +110,12 @@ const sumarDias = (fechaStr, dias) => {
 
 const distribucionSemanalPorDefecto = {
   0: 0,        // Domingo         0 %
-  1: 0.1404,   // Lunes       14.04 %
-  2: 0.1404,   // Martes      14.04 %
-  3: 0.1579,   // Miércoles   15.79 %
-  4: 0.1404,   // Jueves      14.04 %
-  5: 0.263,    // Viernes     26.3  %
-  6: 0.1579    // Sábado      15.79 %
+  1: 0.1361,   // Lunes       13.61 %
+  2: 0.1361,   // Martes      13.61 %
+  3: 0.17,     // Miércoles   17.00 %
+  4: 0.1361,   // Jueves      13.61 %
+  5: 0.2517,   // Viernes     25.17 %
+  6: 0.17      // Sábado      17.00 %
 };
 
 
