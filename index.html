@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V47.2</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V48</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -88,9 +88,38 @@
         </button>
         <span id="limites-feedback" style="margin-left: 1em; color: #80d4aa;"></span>
       </div>
+      <button type="button" onclick="mostrarVistaDistribucionSemanal()">📆 Distribución Semanal</button>
       <button type="submit">Guardar Límites</button>
     </form>
     <button type="button" onclick="volverAPrincipal()">Volver</button>
+  </section>
+
+  <!-- === Vista Distribución Semanal === -->
+  <section class="container" id="vista-distribucion-semanal" style="display: none;">
+    <h2>Distribución Semanal del Gasto</h2>
+
+    <div id="limite-semanal-actual" style="text-align: center; font-size: 0.9em; color: #ccc; margin-bottom: 1em;"></div>
+  
+    <!-- Tabla original -->
+    <h3>Distribución Original</h3>
+    <table id="tabla-distribucion-original">
+      <thead>
+        <tr><th>Día</th><th>Proporción (%)</th><th>Monto</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Tabla ajustada -->
+    <h3 style="margin-top: 2em;">Distribución Ajustada (días restantes)</h3>
+    <table id="tabla-distribucion-ajustada">
+      <thead>
+        <tr><th>Día</th><th>Proporción actualizada</th><th>Monto</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button type="button" onclick="mostrarEditorDistribucion()">✏️ Editar proporciones</button>
+    <button type="button" onclick="cerrrarVistaDistribucionSemanal()">Volver</button>
   </section>
 
   <!-- === Vista Tabla de Gastos === -->

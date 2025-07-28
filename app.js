@@ -305,7 +305,18 @@ const volverAPrincipal = () => {
   document.getElementById("vista-principal").style.display = "block";
   document.getElementById("resumen").style.display = "block";
 };
-  
+
+function mostrarVistaDistribucionSemanal() {
+  document.querySelectorAll("section.container").forEach(s => s.style.display = "none");
+  document.getElementById("vista-distribucion-semanal").style.display = "block";
+  renderizarDistribucionSemanal();
+  history.pushState({ vista: "vista-distribucion-semanal" }, "", "#vista-distribucion-semanal");
+}
+
+function cerrrarVistaDistribucionSemanal() {
+  document.getElementById("vista-distribucion-semanal").style.display = "none";
+  document.getElementById("vista-configuracion").style.display = "block";
+}
 // === OPERACIONES CON GASTOS ===
 
 function agregarGasto(e) {
@@ -1411,6 +1422,92 @@ function actualizarCategoriaTDCEnLiquidez() {
   const nueva = [...liquidez, { categoria: "TDC", monto: disponibleTDC }];
   localStorage.setItem("liquidez", JSON.stringify(nueva));
 }
+
+function renderizarDistribucionSemanal() {
+  const distribucion = distribucionSemanalPorDefecto;
+  const conf = cargarLimites();
+  const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const hoy = crearFechaLocal(getToday());
+  const diaHoy = hoy.getDay();
+
+  const tbodyOriginal = document.querySelector("#tabla-distribucion-original tbody");
+  const tbodyAjustada = document.querySelector("#tabla-distribucion-ajustada tbody");
+
+  tbodyOriginal.innerHTML = "";
+  tbodyAjustada.innerHTML = "";
+
+  const limiteSemanal = conf.semana;
+
+  document.getElementById("limite-semanal-actual").textContent =
+  `Límite semanal actual: ${formatCurrency(limiteSemanal)}`;
+
+  // --- Tabla Original ---
+  let total = 0;
+  for (let i = 0; i < 7; i++) {
+    const prop = distribucion[i] || 0;
+    const monto = prop * limiteSemanal;
+    total += monto;
+
+    const row = `
+      <tr>
+        <td>${dias[i]}</td>
+        <td>${(prop * 100).toFixed(2)}%</td>
+        <td>${formatCurrency(monto)}</td>
+      </tr>`;
+    tbodyOriginal.insertAdjacentHTML("beforeend", row);
+  }
+
+  // --- Tabla Ajustada ---
+  const gastos = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
+  const fechaInicio = crearFechaLocal(getToday());
+  const offset = (diaHoy - conf.inicioSemana + 7) % 7;
+  fechaInicio.setDate(hoy.getDate() - offset);
+  fechaInicio.setHours(0, 0, 0, 0);
+  
+  const fechaFin = new Date(fechaInicio);
+
+  fechaFin.setDate(fechaFin.getDate() + 7)
+  
+  const fechaFinISO = toLocalISODate(fechaFin);
+  console.log("fechaFinISO", fechaFinISO);
+  const fechaInicioISO = toLocalISODate(fechaInicio);
+  console.log("fechaInicioISO", fechaInicioISO);
+
+
+  const gastosSemana = gastos.filter(g =>
+    g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO
+  );
+
+  const gastoPorDia = {};
+  gastosSemana.forEach(g => {
+    const fecha = crearFechaLocal(g.timestamp.slice(0, 10));
+    const dia = fecha.getDay();
+    gastoPorDia[dia] = (gastoPorDia[dia] || 0) + g.monto;
+  });
+
+  const diasSemana = [...Array(7)].map((_, i) => (fechaInicio.getDay() + i) % 7);
+  const hoyRelativo = (diaHoy - conf.inicioSemana + 7) % 7;
+  const diasFaltantes = diasSemana.slice(hoyRelativo);
+  const gastoAcumulado = diasSemana
+    .slice(0, hoyRelativo)
+    .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
+  const restante = limiteSemanal - gastoAcumulado;
+  const sumaProporcionesRestantes = diasFaltantes.reduce((acc, d) => acc + distribucion[d], 0);
+
+  diasFaltantes.forEach(d => {
+    const propRel = distribucion[d] / sumaProporcionesRestantes;
+    const monto = propRel * restante;
+    const nuevaProp = monto / limiteSemanal;
+    const row = `
+      <tr>
+        <td>${dias[d]}</td>
+        <td>${(nuevaProp * 100).toFixed(2)}%</td>
+        <td>${formatCurrency(monto)}</td>
+      </tr>`;
+    tbodyAjustada.insertAdjacentHTML("beforeend", row);
+  });
+}
+
 
 // === INICIALIZACIÓN ===
 
