@@ -118,6 +118,13 @@ const distribucionSemanalPorDefecto = {
   6: 0.17      // Sábado      17.00 %
 };
 
+function obtenerDistribucionSemanal() {
+  return JSON.parse(localStorage.getItem("distribucionSemanal")) || distribucionSemanalPorDefecto;
+}
+
+function guardarDistribucionSemanal(obj) {
+  localStorage.setItem("distribucionSemanal", JSON.stringify(obj));
+}
 
 
 // Liquidez disponible contando sólo los gastos de hasta un día anterior
@@ -155,7 +162,7 @@ function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
 function actualizarLimitesDesdeLiquidez() {
   
   const limites = cargarLimites();
-  const distribucion = distribucionSemanalPorDefecto;
+  const distribucion = obtenerDistribucionSemanal();
   
   const hoy = getToday();
   
@@ -261,7 +268,7 @@ function cargarLimites() {
     const limiteCalculado = calcularLimiteDinamicoDiario({
       gastos,
       limiteSemanal: conf.semana,
-      distribucion: distribucionSemanalPorDefecto,
+      distribucion: obtenerDistribucionSemanal(),
       inicioSemana: conf.inicioSemana
     });
     conf.dia = Math.max(0, Math.round(limiteCalculado)); // evita negativos
@@ -317,6 +324,37 @@ function cerrrarVistaDistribucionSemanal() {
   document.getElementById("vista-distribucion-semanal").style.display = "none";
   document.getElementById("vista-configuracion").style.display = "block";
 }
+
+function mostrarEditorDistribucion() {
+  document.getElementById("vista-distribucion-semanal").style.display = "none";
+  document.getElementById("modal-editar-distribucion").style.display = "block";
+
+  const distribucion = obtenerDistribucionSemanal();
+  const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+  const tbody = document.getElementById("tabla-form-distribucion");
+  tbody.innerHTML = "";
+
+  for (let i = 0; i < 7; i++) {
+    const porcentaje = (distribucion[i] || 0) * 100;
+    const row = `
+      <tr>
+        <td>${dias[i]}</td>
+        <td>
+          <input type="number" min="0" max="100" step="0.01"
+            id="input-dia-${i}" value="${porcentaje.toFixed(2)}"
+            style="width: 80px; text-align: right;" /> %
+        </td>
+      </tr>`;
+    tbody.insertAdjacentHTML("beforeend", row);
+  }
+}
+
+function cerrarEdicionDistribucion() {
+  document.getElementById("modal-editar-distribucion").style.display = "none";
+  document.getElementById("vista-distribucion-semanal").style.display = "block";
+}
+
 // === OPERACIONES CON GASTOS ===
 
 function agregarGasto(e) {
@@ -470,7 +508,7 @@ function importarCSV(e) {
       const nuevoLimite = calcularLimiteDinamicoDiario({
         gastos,
         limiteSemanal: conf.semana,
-        distribucion: distribucionSemanalPorDefecto,
+        distribucion: obtenerDistribucionSemanal(),
         inicioSemana: conf.inicioSemana
       });
 
@@ -1424,7 +1462,7 @@ function actualizarCategoriaTDCEnLiquidez() {
 }
 
 function renderizarDistribucionSemanal() {
-  const distribucion = distribucionSemanalPorDefecto;
+  const distribucion = obtenerDistribucionSemanal();
   const conf = cargarLimites();
   const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
   const hoy = crearFechaLocal(getToday());
@@ -1469,10 +1507,7 @@ function renderizarDistribucionSemanal() {
   fechaFin.setDate(fechaFin.getDate() + 7)
   
   const fechaFinISO = toLocalISODate(fechaFin);
-  console.log("fechaFinISO", fechaFinISO);
   const fechaInicioISO = toLocalISODate(fechaInicio);
-  console.log("fechaInicioISO", fechaInicioISO);
-
 
   const gastosSemana = gastos.filter(g =>
     g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO
@@ -1818,6 +1853,49 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     document.getElementById("form-liquidez").reset();
     renderizarTablaLiquidez();
     renderizarGraficaLiquidez(); // actualiza gráfica
+  });
+
+  document.getElementById("form-editar-distribucion").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const nuevaDistribucion = {};
+    let suma = 0;
+
+    for (let i = 0; i < 7; i++) {
+      const input = document.getElementById(`input-dia-${i}`);
+      const valor = parseFloat(input.value) || 0;
+      suma += valor;
+      nuevaDistribucion[i] = valor / 100;
+    }
+
+    const msg = document.getElementById("distribucion-feedback");
+    if (Math.abs(suma - 100) > 0.01) {
+      msg.textContent = `❌ La suma es ${suma.toFixed(2)}%. Debe ser exactamente 100%.`;
+      return;
+    }
+    msg.textContent = "";
+
+    guardarDistribucionSemanal(nuevaDistribucion);
+
+    // Recalcular límite diario dinámico desde hoy
+    const hoy = getToday();
+    const gastos = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
+    const conf = JSON.parse(localStorage.getItem("limites"));
+
+    const nuevoLimite = calcularLimiteDinamicoDiario({
+      gastos,
+      limiteSemanal: conf.semana,
+      distribucion: nuevaDistribucion,
+      inicioSemana: conf.inicioSemana
+    });
+
+    conf.dia = Math.max(0, Math.round(nuevoLimite));
+    localStorage.setItem("limites", JSON.stringify(conf));
+    localStorage.setItem("limites_dia_aplicado", hoy);
+
+    cerrarEdicionDistribucion();
+    renderizarDistribucionSemanal();
+    mostrarVistaResumenBarras();
   });
 
 });

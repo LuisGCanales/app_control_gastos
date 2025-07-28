@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V48</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V48.2</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -120,6 +120,20 @@
 
     <button type="button" onclick="mostrarEditorDistribucion()">✏️ Editar proporciones</button>
     <button type="button" onclick="cerrrarVistaDistribucionSemanal()">Volver</button>
+  </section>
+
+  <!-- Modal edición proporciones -->
+  <section class="container" id="modal-editar-distribucion" style="display: none;">
+    <h2>Editar Proporciones Semanales</h2>
+    <form id="form-editar-distribucion">
+      <table style="width: 100%; margin-bottom: 1em;">
+        <thead><tr><th>Día</th><th>Proporción (%)</th></tr></thead>
+        <tbody id="tabla-form-distribucion"></tbody>
+      </table>
+      <button type="submit">💾 Guardar cambios</button>
+      <button type="button" onclick="cerrarEdicionDistribucion()">Cancelar</button>
+      <div id="distribucion-feedback" style="color: #ff8080; text-align: center; margin-bottom: 1em;"></div>
+    </form>
   </section>
 
   <!-- === Vista Tabla de Gastos === -->
