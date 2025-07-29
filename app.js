@@ -671,6 +671,7 @@ function abrirFormularioEdicion(gasto) {
   document.getElementById("editar-fijo").checked = gasto.fijo || false;
   document.getElementById("editar-fecha").value = gasto.timestamp.slice(0, 10);
   document.getElementById("editar-nota").value = gasto.nota || "";
+  autoExpand({ target: document.getElementById("editar-nota") });
   history.pushState({ vista: "modal-edicion" }, "", "#modal-edicion");
 }
 
@@ -791,6 +792,7 @@ function abrirEdicionFijo(idx) {
   document.getElementById("editar-fijo-monto").value = g.monto;
   document.getElementById("editar-fijo-fecha").value = g.fecha;
   document.getElementById("editar-fijo-nota").value = g.nota || "";
+  autoExpand({ target: document.getElementById("editar-fijo-nota") });
   document.getElementById("editar-fijo").dataset.idx = idx;
 
   // Mostrar botón correspondiente según el estado
@@ -1600,6 +1602,11 @@ function renderizarDistribucionSemanal() {
   });
 }
 
+function autoExpand(e) {
+  const el = e.target;
+  el.style.height = "auto";
+  el.style.height = (el.scrollHeight) + "px";
+}
 
 // === INICIALIZACIÓN ===
 
@@ -1953,6 +1960,10 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     cerrarEdicionDistribucion();
     renderizarDistribucionSemanal();
     mostrarVistaResumenBarras();
+  });
+
+  document.querySelectorAll("textarea").forEach(area => {
+    area.addEventListener("input", autoExpand);
   });
 
 });

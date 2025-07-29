@@ -68,6 +68,9 @@ textarea {
   box-sizing: border-box;
   font-family: inherit;
   font-size: 0.9em;
+  resize: none;
+  overflow: hidden;
+  transition: height 0.2s ease;
 }
 
 input::placeholder {
