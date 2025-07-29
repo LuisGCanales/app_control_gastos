@@ -1705,6 +1705,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("fecha-personalizada").style.display = e.target.checked ? "block" : "none";
   });
 
+  document.getElementById("pago-fijo-activar-fecha").addEventListener("change", e => {
+    document.getElementById("pago-fijo-fecha-personalizada").style.display = e.target.checked ? "block" : "none";
+  });
+
   // Guardar edición
   document.getElementById("form-editar").addEventListener("submit", e => {
     e.preventDefault();
@@ -1792,6 +1796,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     document.getElementById("pago-fijo-compartido").checked = false;
     document.getElementById("pago-fijo-activar-fecha").checked = false;
     document.getElementById("pago-fijo-fecha-personalizada").value = "";
+    document.getElementById("pago-fijo-fecha-personalizada").style.display = "none";
     document.getElementById("pago-fijo-nota").value = fijo.nota || "";
 
     document.getElementById("form-pago-fijo").dataset.fijoRelacionado = idx;
