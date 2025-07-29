@@ -1360,10 +1360,26 @@ function renderizarTablaLiquidez() {
     tr.innerHTML = `
       <td>${item.categoria}</td>
       <td>${formatCurrency(item.monto)}</td>
-      <td><button onclick="eliminarLiquidez(${idx})">🗑</button></td>
+      <td class="centrado">
+        <span class="btn-editar" data-idx="${idx}" title="Editar">
+          <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </span>
+      </td>
     `;
     tbody.appendChild(tr);
   });
+
+  document.querySelectorAll("#tabla-liquidez .btn-editar").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = +btn.dataset.idx;
+      abrirModalEdicionLiquidez(idx);
+    });
+  });
+
 }
 
 let graficoLiquidez;
@@ -1433,13 +1449,6 @@ function renderizarGraficaLiquidez() {
   });
 }
 
-function eliminarLiquidez(idx) {
-  const liquidez = obtenerLiquidez();
-  liquidez.splice(idx, 1);
-  guardarLiquidez(liquidez);
-  renderizarGraficaLiquidez();
-}
-
 function actualizarCategoriaTDCEnLiquidez() {
   const liquidez = obtenerLiquidez().filter(item => item.categoria !== "TDC");
   const limites = cargarLimites();
@@ -1460,6 +1469,54 @@ function actualizarCategoriaTDCEnLiquidez() {
   const nueva = [...liquidez, { categoria: "TDC", monto: disponibleTDC }];
   localStorage.setItem("liquidez", JSON.stringify(nueva));
 }
+
+let idxEditandoLiquidez = null;
+
+function abrirModalEdicionLiquidez(idx) {
+  const liquidez = obtenerLiquidez();
+  const item = liquidez[idx];
+  idxEditandoLiquidez = idx;
+
+  document.getElementById("editar-liquidez-categoria").value = item.categoria;
+  document.getElementById("editar-liquidez-monto").value = item.monto;
+
+  document.getElementById("modal-liquidez").style.display = "none";
+  document.getElementById("modal-edicion-liquidez").style.display = "block";
+}
+
+function cerrarModalEdicionLiquidez() {
+  document.getElementById("modal-edicion-liquidez").style.display = "none";
+  document.getElementById("modal-liquidez").style.display = "block";
+  idxEditandoLiquidez = null;
+}
+
+document.getElementById("form-editar-liquidez").addEventListener("submit", e => {
+  e.preventDefault();
+  const liquidez = obtenerLiquidez();
+  const nuevoMonto = parseFloat(document.getElementById("editar-liquidez-monto").value);
+  if (isNaN(nuevoMonto)) return;
+
+  liquidez[idxEditandoLiquidez].monto = nuevoMonto;
+  guardarLiquidez(liquidez);
+  cerrarModalEdicionLiquidez();
+  renderizarTablaLiquidez();
+  mostrarVistaResumenBarras();
+});
+
+document.getElementById("btn-eliminar-liquidez").addEventListener("click", () => {
+  const categoria = document.getElementById("editar-liquidez-categoria").value;
+  const confirmar = confirm(`¿Eliminar la categoría "${categoria}"? Esta acción no se puede deshacer.`);
+
+  if (!confirmar) return;
+
+  const liquidez = obtenerLiquidez();
+  liquidez.splice(idxEditandoLiquidez, 1);
+  guardarLiquidez(liquidez);
+  cerrarModalEdicionLiquidez();
+  renderizarTablaLiquidez();
+  mostrarVistaResumenBarras();
+});
+
 
 function renderizarDistribucionSemanal() {
   const distribucion = obtenerDistribucionSemanal();

@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V48.2</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V49</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -340,7 +340,7 @@
     <div id="total-liquidez" style="margin-top: 1em; font-weight: bold; text-align: center;"></div>
     <canvas id="grafica-liquidez" style="margin-top: 2em;" height="350"></canvas>
     <div style="margin-bottom: 1em; text-align: center;">
-      <button onclick="abrirModalLiquidez()">➕ Agregar / Editar Categorías</button>
+      <button onclick="abrirModalLiquidez()">Editar Categorías</button>
     </div>
     <button onclick="volverAPrincipal()">Volver</button>
   </section>
@@ -361,7 +361,7 @@
 
     <table id="tabla-liquidez" class="tabla-liquidez">
       <thead>
-        <tr>
+        <tr> 
           <th class="categoria-header">Categoría</th>
           <th class="monto-header">Monto</th>
           <th class="acciones-header"></th>
@@ -371,6 +371,18 @@
     </table>
 
     <button onclick="cerrarModalLiquidez()">Cerrar</button>
+  </section>
+
+
+  <section class="container" id="modal-edicion-liquidez" style="display: none;">
+    <h2>Editar Categoría de Liquidez</h2>
+    <form id="form-editar-liquidez">
+      <label>Categoría: <input type="text" id="editar-liquidez-categoria" readonly /></label>
+      <label>Monto: <input type="number" id="editar-liquidez-monto" step="0.01" required /></label>
+      <button type="submit">Guardar cambios</button>
+      <button type="button" id="btn-eliminar-liquidez" style="margin-top: 1em; background-color: #802020;">🗑 Eliminar</button>
+      <button type="button" onclick="cerrarModalEdicionLiquidez()">Volver</button>
+    </form>
   </section>
 
   <!-- Scripts -->
