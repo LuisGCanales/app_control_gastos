@@ -371,7 +371,7 @@ function agregarGasto(e) {
     ? `${fechaInput}T23:59:00`
     : obtenerFechaHoraLocal();
 
-  const nota = "";
+  const nota = document.getElementById("nota-gasto").value.trim();
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   gastos.push({ monto, concepto, tdc, compartido, fijo, timestamp, nota });
   localStorage.setItem("gastos", JSON.stringify(gastos));
@@ -392,6 +392,7 @@ function agregarGasto(e) {
   }
 
   document.getElementById("gasto-form").reset();
+  autoExpand({ target: document.getElementById("nota-gasto") });
   document.getElementById("fecha-personalizada").style.display = "none";
   mostrarVistaResumenBarras();
   actualizarSugerencias();
