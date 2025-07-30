@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V50.3</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V50.4</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -254,13 +254,13 @@
         <span class="switch-label">Pospuestos</span>
       </div>
     </div>
-  <div class="acciones-secundarias">
-    <button onclick="exportarFijosCSV()">💾 Exportar CSV</button>
-    <label class="importar-label">
-      Importar CSV
-      <input type="file" accept="text/*,.csv,.txt" style="display: none;" onchange="importarFijosCSV(event)" />
-    </label>
-  </div>
+    <div class="acciones-secundarias">
+      <button onclick="exportarFijosCSV()">💾 Exportar CSV</button>
+      <label class="importar-label">
+        Importar CSV
+        <input type="file" accept="text/*,.csv,.txt" style="display: none;" onchange="importarFijosCSV(event)" />
+      </label>
+    </div>
     <button type="button" onclick="volverAPrincipal()">Volver</button>
   </section>
 

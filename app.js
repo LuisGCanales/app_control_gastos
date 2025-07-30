@@ -348,6 +348,9 @@ function mostrarEditorDistribucion() {
       </tr>`;
     tbody.insertAdjacentHTML("beforeend", row);
   }
+
+  history.pushState({ vista: "modal-editar-distribucion" }, "", "#modal-editar-distribucion");
+
 }
 
 function cerrarEdicionDistribucion() {
@@ -1485,6 +1488,7 @@ function abrirModalEdicionLiquidez(idx) {
 
   document.getElementById("modal-liquidez").style.display = "none";
   document.getElementById("modal-edicion-liquidez").style.display = "block";
+  history.pushState({ vista: "modal-liquidez" }, "", "#modal-liquidez");
 }
 
 function cerrarModalEdicionLiquidez() {
@@ -1804,6 +1808,8 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     // Mostrar modal
     document.getElementById("modal-edicion-fijo").style.display = "none";
     document.getElementById("modal-pago-fijo").style.display = "block";
+    history.pushState({ vista: "modal-pago-fijo" }, "", "#modal-pago-fijo");
+
   });
 
   // Form de pago fijo
@@ -1855,6 +1861,16 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     if (!visible) return;
 
+    if (visible.id === "vista-distribucion-semanal") {
+      cerrrarVistaDistribucionSemanal();
+      return;
+    }
+
+    if (visible.id === "modal-editar-distribucion") {
+      cerrarEdicionDistribucion();
+      return;
+    }
+    
     if (visible.id === "modal-edicion") {
       cerrarFormularioEdicion();
       return;
@@ -1867,6 +1883,21 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     if (visible.id === "modal-edicion-fijo") {
       cerrarFormularioEdicionFijo();
+      return;
+    }
+
+    if (visible.id === "modal-pago-fijo") {
+      cerrarModalPagoFijo();
+      return;
+    }
+
+    if (visible.id === "modal-liquidez") {
+      cerrarModalLiquidez();
+      return;
+    }
+
+    if (visible.id === "modal-edicion-liquidez") {
+      cerrarModalEdicionLiquidez();
       return;
     }
 
