@@ -15,7 +15,9 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V50.5</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V50.5
+
+    </sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -28,11 +30,9 @@
       
       <!-- Etiquetas TDC / Compartido / Fijo -->
       <div class="switches">
-        <div class="checkbox-wrapper-17">
-          <input type="checkbox" id="tdc" />
-          <label for="tdc" title="Pago con TDC"></label>
-          <span class="switch-label">TDC</span>
-        </div>
+        <select id="medio-pago" required>
+          <option value="">Selecciona medio...</option>
+        </select>
         <div class="checkbox-wrapper-17">
           <input type="checkbox" id="compartido" />
           <label for="compartido" title="Compartido con alguien más"></label>
@@ -150,7 +150,7 @@
     </div>
     <table id="tabla-gastos">
       <thead>
-        <tr><th>Concepto</th><th>Monto</th><th>TDC</th><th>C.</th><th>F.</th><th></th></tr>
+        <tr><th>Concepto</th><th>Monto</th><th>Medio</th><th>C.</th><th>F.</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>  
@@ -172,11 +172,10 @@
           </div>
         </div>
         <div class="switches filtros-switches">
-          <div class="checkbox-wrapper-17">
-            <input type="checkbox" id="filtro-solo-tdc" />
-            <label for="filtro-solo-tdc" title="Solo TDC"></label>
-            <span class="switch-label">Solo TDC</span>
-          </div>
+          <label for="filtro-medio">Medio:</label>
+          <select id="filtro-medio">
+            <option value="">Todos</option>
+          </select>
           <div class="checkbox-wrapper-17">
             <input type="checkbox" id="filtro-solo-compartido" />
             <label for="filtro-solo-compartido" title="Solo compartidos"></label>

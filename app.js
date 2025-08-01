@@ -365,7 +365,9 @@ function agregarGasto(e) {
   const concepto = document.getElementById("concepto").value.trim();
   if (!monto || !concepto) return alert("Ingresa un monto y concepto válido.");
 
-  const tdc = document.getElementById("tdc").checked;
+  const medio = document.getElementById("medio-pago").value.trim();
+  if (!medio) return alert("Selecciona un medio de pago válido.");
+
   const compartido = document.getElementById("compartido").checked;
   const fijo = document.getElementById("fijo").checked;
   const fechaInput = document.getElementById("fecha-personalizada").value;
@@ -375,7 +377,15 @@ function agregarGasto(e) {
 
   const nota = document.getElementById("nota-gasto").value.trim();
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  gastos.push({ monto, concepto, tdc, compartido, fijo, timestamp, nota });
+  gastos.push({ monto, concepto, medio, compartido, fijo, timestamp, nota });
+
+  const liquidez = obtenerLiquidez();
+  const idx = liquidez.findIndex(item => item.categoria === medio);
+  if (idx !== -1) {
+    liquidez[idx].monto -= monto;
+    guardarLiquidez(liquidez);
+  }
+
   localStorage.setItem("gastos", JSON.stringify(gastos));
 
   // Si viene de gasto fijo: marcar como pagado
@@ -543,13 +553,13 @@ function mostrarTabla() {
   document.getElementById("filtro-fecha").addEventListener("input", renderizarTablaGastos);
   document.getElementById("filtro-fijos").addEventListener("change", renderizarTablaGastos);
   document.getElementById("filtro-variables").addEventListener("change", renderizarTablaGastos);
-  document.getElementById("filtro-solo-tdc").addEventListener("change", renderizarTablaGastos);
+  document.getElementById("filtro-medio").addEventListener("change", renderizarTablaGastos);
   document.getElementById("filtro-solo-compartido").addEventListener("change", renderizarTablaGastos);
   document.getElementById("limpiar-filtros").addEventListener("click", () => {
     document.getElementById("filtro-fecha").value = "";
     document.getElementById("filtro-fijos").checked = false;
     document.getElementById("filtro-variables").checked = true;
-    document.getElementById("filtro-solo-tdc").checked = false;
+    document.getElementById("filtro-medio").value = "";
     document.getElementById("filtro-solo-compartido").checked = false;
     renderizarTablaGastos();
   });
@@ -576,7 +586,8 @@ function renderizarTablaGastos() {
   const fFecha = document.getElementById("filtro-fecha").value;
   const mostrarFijos = document.getElementById("filtro-fijos").checked;
   const mostrarVariables = document.getElementById("filtro-variables").checked;
-  const soloTDC = document.getElementById("filtro-solo-tdc").checked;
+  const filtroMedio = document.getElementById("filtro-medio").value;
+  console.log("filtroMedio", filtroMedio);
   const soloCompartido = document.getElementById("filtro-solo-compartido").checked;
 
   // Filtrado activo
@@ -584,10 +595,11 @@ function renderizarTablaGastos() {
     const fecha = g.timestamp.slice(0, 10);
     const esFijo = g.fijo;
     const mostrarPorTipo = (esFijo && mostrarFijos) || (!esFijo && mostrarVariables);
-    const pasaTDC = !soloTDC || g.tdc;
+    const pasaMedio = !filtroMedio || g.medio === filtroMedio;
+    console.log("pasaMedio", pasaMedio);
     const pasaCompartido = !soloCompartido || g.compartido;
     const pasaFecha = !fFecha || fecha === fFecha;
-    return mostrarPorTipo && pasaTDC && pasaCompartido && pasaFecha;
+    return mostrarPorTipo && pasaCompartido && pasaFecha && pasaMedio;
   });
 
   // Agrupar por fecha
@@ -625,7 +637,7 @@ function renderizarTablaGastos() {
           ${g.nota ? `<span class="nota-icono" onclick="mostrarNotaToast(decodeURIComponent('${encodeURIComponent(g.nota)}'))"> 📝</span>` : ""}
         </td>
         <td class="${g.monto < 0 ? 'reintegro' : ''}">${formatCurrency(g.monto)}</td>
-        <td class="centrado">${g.tdc ? "ꪜ" : ""}</td>
+        <td class="centrado">${g.medio || "-"}</td>
         <td class="centrado">${g.compartido ? "ꪜ" : ""}</td>
         <td class="centrado">${g.fijo ? "ꪜ" : ""}</td>
         <td class="centrado">
@@ -1325,6 +1337,8 @@ function obtenerLiquidez() {
 
 function guardarLiquidez(arr) {
   localStorage.setItem("liquidez", JSON.stringify(arr));
+  actualizarOpcionesMedioPago();
+  actualizarOpcionesFiltroMedio();
 }
 
 function mostrarVistaLiquidez() {
@@ -1584,12 +1598,50 @@ function autoExpand(e) {
   el.style.height = (el.scrollHeight) + "px";
 }
 
+
+function actualizarOpcionesMedioPago(selectId = "medio-pago") {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const liquidez = obtenerLiquidez();
+  const medios = liquidez.map(item => item.categoria);
+
+  select.innerHTML = `<option value="">Selecciona medio...</option>`;
+  medios.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m;
+    option.textContent = m;
+    select.appendChild(option);
+  });
+}
+
+
+function actualizarOpcionesFiltroMedio() {
+  const select = document.getElementById("filtro-medio");
+  if (!select) return;
+
+  const liquidez = obtenerLiquidez();
+  const medios = liquidez.map(l => l.categoria);
+
+  select.innerHTML = `<option value="">Todos</option>`;
+  medios.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m;
+    option.textContent = m;
+    select.appendChild(option);
+  });
+}
+
+
 // === INICIALIZACIÓN ===
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarLimites();
   mostrarVistaResumenBarras();
   actualizarSugerencias();
+  actualizarOpcionesMedioPago();
+  actualizarOpcionesFiltroMedio();
+
 
   if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock("portrait").catch((err) => {
