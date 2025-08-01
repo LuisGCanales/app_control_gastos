@@ -377,7 +377,17 @@ function agregarGasto(e) {
 
   const nota = document.getElementById("nota-gasto").value.trim();
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  gastos.push({ monto, concepto, medio, compartido, fijo, timestamp, nota });
+  gastos.push({ 
+  id: crypto.randomUUID(),
+  monto, 
+  concepto, 
+  medio, 
+  compartido, 
+  fijo, 
+  timestamp, 
+  nota 
+  });
+
 
   const liquidez = obtenerLiquidez();
   const idx = liquidez.findIndex(item => item.categoria === medio);
@@ -463,15 +473,17 @@ function parsearLineaCSV(linea) {
 
 function exportarCSV() {
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  const filas = [["timestamp", "monto", "concepto", "medio", "compartido", "fijo", "nota"],
+  const filas = [
+    ["id", "fecha", "monto", "concepto", "medio", "compartido", "fijo", "nota"],
     ...gastos.map(g => [
-      g.timestamp.replace("T", " "),
+      g.id || "",
+      g.timestamp.slice(0, 10),
       g.monto,
       escaparCampoCSV(g.concepto),
       g.medio || "",
-      g.compartido ? "Si" : "No",
-      g.fijo ? "Si" : "No",
-      escaparCampoCSV(g.nota) || ""
+      g.compartido ? "Si" : "",
+      g.fijo ? "Si" : "",
+      escaparCampoCSV(g.nota || "")
     ])
   ];
 
@@ -490,20 +502,73 @@ function importarCSV(e) {
 
   const reader = new FileReader();
   reader.onload = evt => {
-    const nuevos = dividirLineasCSV(evt.target.result).slice(1).map(linea => {
-      const [timestamp, monto, concepto, medio, compartido, fijo, nota] = parsearLineaCSV(linea);
-      return {
-        timestamp: timestamp.trim().replace(" ", "T"),
+    const lineas = dividirLineasCSV(evt.target.result).slice(1);
+    const idsEnCSV = new Set();
+    const nuevos = [];
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    for (let i = 0; i < lineas.length; i++) {
+      const campos = parsearLineaCSV(lineas[i]);
+
+      const [id, timestamp, monto, concepto, medio, compartido, fijo, nota] = campos.map(c => c?.trim() ?? "");
+
+      const lineaNumero = i + 2;
+
+      if (!id) {
+        alert(`❌ Error en línea ${lineaNumero}: Falta el campo "id"`);
+        return;
+      }
+
+      if (!uuidRegex.test(id)) {
+        alert(`❌ Error en línea ${lineaNumero}: ID "${id}" no tiene formato UUID válido`);
+        return;
+      }
+
+      if (idsEnCSV.has(id)) {
+        alert(`❌ Error en línea ${lineaNumero}: ID duplicado "${id}" en el CSV`);
+        return;
+      }
+
+      idsEnCSV.add(id);
+
+      nuevos.push({
+        id,
+        timestamp: timestamp.replace(" ", "T"),
         monto: Number(monto),
         concepto,
-        medio: (medio || "").trim(),
-        compartido: (compartido || "").trim() === "Si",
-        fijo: (fijo || "").trim() === "Si",
-        nota: (nota || "").trim()
-      };
-    }).filter(g => g.timestamp);
+        medio,
+        compartido: compartido === "Si",
+        fijo: fijo === "Si",
+        nota
+      });
+      
+    }
 
-    localStorage.setItem("gastos", JSON.stringify(nuevos));
+    const gastosActuales = JSON.parse(localStorage.getItem("gastos")) || [];
+    const idsLocales = new Set(gastosActuales.map(g => g.id));
+    const gastosExtraLocales = gastosActuales.filter(g => !idsEnCSV.has(g.id));
+    const gastosNuevos = nuevos.filter(g => !idsLocales.has(g.id));
+
+    const actualizados = [...gastosActuales];
+    const liquidez = obtenerLiquidez();
+
+    for (const gasto of gastosNuevos) {
+      actualizados.push(gasto);
+
+      // Actualizar liquidez
+      const i = liquidez.findIndex(l => l.categoria === gasto.medio);
+      if (i !== -1) {
+        liquidez[i].monto -= gasto.monto;
+      }
+    }
+
+    localStorage.setItem("gastos", JSON.stringify(actualizados));
+
+    if (gastosExtraLocales.length > 0) {
+      mostrarModalSobrantes(gastosExtraLocales);
+    }
+
+    guardarLiquidez(liquidez);
 
     // Se recalcula el límite diario dinámico
     const hoy = getToday();
@@ -529,6 +594,7 @@ function importarCSV(e) {
     renderizarTablaGastos();
   };
   reader.readAsText(archivo);
+  e.target.value = "";
 }
 
 // === INTERFAZ DE USUARIO ===
@@ -1632,6 +1698,43 @@ function actualizarOpcionesFiltroMedio() {
   });
 }
 
+function mostrarModalSobrantes(gastos) {
+  document.querySelectorAll("section.container").forEach(s => s.style.display = "none");
+
+  const tbody = document.getElementById("tabla-sobrantes");
+  tbody.innerHTML = "";
+
+  gastos.forEach(g => {
+    const fecha = g.timestamp.slice(0, 10);
+    const fila = `
+      <tr>
+        <td><input type="checkbox" class="check-sobrante" data-id="${g.id}" checked></td>
+        <td>${fecha}</td>
+        <td>${g.concepto}</td>
+        <td>${formatCurrency(g.monto)}</td>
+        <td>${g.medio || "-"}</td>
+        <td class="centrado">${g.compartido ? "ꪜ" : ""}</td>
+        <td class="centrado">${g.fijo ? "ꪜ" : ""}</td>
+      </tr>`;
+    tbody.insertAdjacentHTML("beforeend", fila);
+  });
+
+  document.getElementById("modal-eliminar-sobrantes").style.display = "block";
+  history.pushState({ vista: "modal-eliminar-sobrantes" }, "", "#modal-eliminar-sobrantes");
+
+  const checkTodos = document.getElementById("check-todos-sobrantes");
+  checkTodos.checked = true;
+  checkTodos.addEventListener("change", () => {
+    document.querySelectorAll(".check-sobrante").forEach(chk => {
+      chk.checked = checkTodos.checked;
+    });
+  });
+}
+
+function cerrarModalSobrantes() {
+  document.getElementById("modal-eliminar-sobrantes").style.display = "none";
+  document.getElementById("vista-tabla").style.display = "block";
+}
 
 // === INICIALIZACIÓN ===
 
@@ -1752,6 +1855,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fechaOriginal = gastoEditando.timestamp.slice(0, 10);
 
       const nuevoGasto = {
+        id: gastoEditando.id,
         concepto: document.getElementById("editar-concepto").value.trim(),
         monto: +document.getElementById("editar-monto").value,
         medio: document.getElementById("editar-medio").value.trim(),
@@ -1795,14 +1899,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm("¿Estás seguro de que quieres eliminar este gasto?")) return;
 
     const todos = JSON.parse(localStorage.getItem("gastos")) || [];
-    const idx = todos.findIndex(g =>
-      g.timestamp === gastoEditando.timestamp &&
-      g.concepto === gastoEditando.concepto &&
-      g.monto === gastoEditando.monto &&
-      g.medio === gastoEditando.medio &&
-      g.compartido === gastoEditando.compartido &&
-      g.nota === gastoEditando.nota
-    );
+    const idx = todos.findIndex(g => g.id === gastoEditando.id);
 
     const gasto = todos[idx];
 
@@ -1883,7 +1980,17 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
       : obtenerFechaHoraLocal();
 
     const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-    gastos.push({ concepto, monto, medio, compartido, fijo: true, timestamp, nota });
+    const nuevoGasto = {
+      id: crypto.randomUUID(),
+      concepto,
+      monto,
+      medio,
+      compartido,
+      fijo: true,
+      timestamp,
+      nota
+    };    
+    gastos.push(nuevoGasto);
     localStorage.setItem("gastos", JSON.stringify(gastos));
 
     // Descontar de liquidez
@@ -1938,6 +2045,11 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
       return;
     }
 
+    if (visible.id === "tabla-sobrantes") {
+      cerrarModalSobrantes();
+      return;
+    }
+    
     if (visible.id === "vista-graficas") {
       cerrarVistaGraficas();
       return;
@@ -2064,5 +2176,45 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
   document.querySelectorAll("textarea").forEach(area => {
     area.addEventListener("input", autoExpand);
   });
+
+  document.getElementById("form-eliminar-sobrantes").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const seleccionados = Array.from(document.querySelectorAll(".check-sobrante:checked"))
+      .map(chk => chk.dataset.id);
+
+    if (seleccionados.length === 0) {
+      if (!confirm("No seleccionaste ningún gasto para eliminar. ¿Deseas conservar todos los gastos extra en localStorage?")) return;
+
+      cerrarModalSobrantes();
+      return;
+    }
+
+    if (!confirm(`¿Eliminar ${seleccionados.length} gasto(s) seleccionados y reintegrar su liquidez?`)) return;
+
+    let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+    const liquidez = obtenerLiquidez();
+
+    // Filtrar y revertir liquidez
+    const eliminados = gastos.filter(g => seleccionados.includes(g.id));
+    eliminados.forEach(g => {
+      const idx = liquidez.findIndex(l => l.categoria === g.medio);
+      if (idx !== -1) {
+        liquidez[idx].monto += g.monto;
+      }
+    });
+
+    // Eliminar gastos
+    gastos = gastos.filter(g => !seleccionados.includes(g.id));
+
+    // Guardar
+    localStorage.setItem("gastos", JSON.stringify(gastos));
+    guardarLiquidez(liquidez);
+
+    cerrarModalSobrantes();
+    renderizarTablaGastos();
+    mostrarVistaResumenBarras();
+  });
+
 
 });

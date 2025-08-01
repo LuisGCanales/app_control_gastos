@@ -390,6 +390,30 @@
     </form>
   </section>
 
+  <!-- Modal de eliminación manual de gastos en localStorage no presentes en importación nueva -->
+  <section class="container" id="modal-eliminar-sobrantes" style="display: none;">
+    <h2>Gastos no presentes en el archivo importado</h2>
+    <form id="form-eliminar-sobrantes">
+      <table style="width: 100%; margin-bottom: 1em;">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="check-todos-sobrantes" /></th>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Medio</th>
+            <th>C.</th>
+            <th>F.</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-sobrantes"></tbody>
+      </table>
+      <button type="submit">🗑 Eliminar seleccionados</button>
+      <button type="button" onclick="cerrarModalSobrantes()">Cancelar</button>
+    </form>
+  </section>
+
+
   <!-- Scripts -->
   <script src="app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
