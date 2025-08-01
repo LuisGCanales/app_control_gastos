@@ -597,3 +597,31 @@ button:hover {
   transform: scale(1.1);
   opacity: 0.9;
 }
+
+select {
+  width: 100%;
+  padding: 0.6em;
+  margin-top: 0.3em;
+  margin-bottom: 1em;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(242, 242, 242, 0.6);
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.9em;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4C301F; /* mismo borde café que usas en inputs */
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+option {
+  background-color: #1e1e1e;
+  color: rgba(242, 242, 242, 0.6);
+}

@@ -29,27 +29,24 @@
       <textarea id="nota-gasto" rows="2" placeholder="Agrega una nota (opcional)"></textarea>
       
       <!-- Etiquetas TDC / Compartido / Fijo -->
+      <select id="medio-pago" required>
+        <option value="">Selecciona medio...</option>
+      </select>
       <div class="switches">
-        <select id="medio-pago" required>
-          <option value="">Selecciona medio...</option>
-        </select>
+
+        <!-- Activar fecha personalizada -->
+        <label class="custom-fecha-label">
+          <input type="checkbox" id="activar-fecha" />
+          Fecha personalizada
+        </label>
+
         <div class="checkbox-wrapper-17">
           <input type="checkbox" id="compartido" />
           <label for="compartido" title="Compartido con alguien más"></label>
           <span class="switch-label">Compartido</span>
         </div>
-        <div class="checkbox-wrapper-17">
-          <input type="checkbox" id="fijo" />
-          <label for="fijo" title="Gasto fijo mensual"></label>
-          <span class="switch-label">Fijo</span>
-        </div>
       </div>
 
-      <!-- Activar fecha personalizada -->
-      <label class="custom-fecha-label">
-        <input type="checkbox" id="activar-fecha" />
-        Fecha personalizada
-      </label>
       <input type="date" id="fecha-personalizada" style="display: none;" />
 
       <button type="submit">Agregar Gasto</button>

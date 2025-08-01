@@ -369,7 +369,6 @@ function agregarGasto(e) {
   if (!medio) return alert("Selecciona un medio de pago válido.");
 
   const compartido = document.getElementById("compartido").checked;
-  const fijo = document.getElementById("fijo").checked;
   const fechaInput = document.getElementById("fecha-personalizada").value;
   const timestamp = document.getElementById("activar-fecha").checked && fechaInput
     ? `${fechaInput}T23:59:00`
@@ -383,7 +382,7 @@ function agregarGasto(e) {
   concepto, 
   medio, 
   compartido, 
-  fijo, 
+  fijo: false, 
   timestamp, 
   nota 
   });
