@@ -274,7 +274,6 @@ function cargarLimites() {
     conf.dia = Math.max(0, Math.round(limiteCalculado)); // evita negativos
     localStorage.setItem("limites", JSON.stringify(conf));
     localStorage.setItem("limites_dia_aplicado", hoy); 
-    actualizarCategoriaTDCEnLiquidez();
   }
   ["dia", "semana", "mes", "compartido", "tdc"].forEach(c =>
     document.getElementById(`limite-${c}`).value = conf[c]
@@ -378,11 +377,6 @@ function agregarGasto(e) {
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   gastos.push({ monto, concepto, tdc, compartido, fijo, timestamp, nota });
   localStorage.setItem("gastos", JSON.stringify(gastos));
-
-  // Si el pago fue con TDC se actualiza la categoría TDC en liquidez
-  if (tdc) {
-    actualizarCategoriaTDCEnLiquidez();
-  }
 
   // Si viene de gasto fijo: marcar como pagado
   const idxRelacionado = document.getElementById("gasto-form").dataset.fijoRelacionado;
@@ -518,9 +512,6 @@ function importarCSV(e) {
 
       conf.dia = Math.max(0, Math.round(nuevoLimite));
       localStorage.setItem("limites", JSON.stringify(conf));
-      //  Actualizar TDC en liquidez
-      actualizarCategoriaTDCEnLiquidez();
-
     }
 
     // Actualizar vista
@@ -1356,7 +1347,7 @@ function cerrarModalLiquidez() {
 }
 
 function renderizarTablaLiquidez() {
-  actualizarCategoriaTDCEnLiquidez();
+
   const liquidez = obtenerLiquidez();
   const tbody = document.querySelector("#tabla-liquidez tbody");
   tbody.innerHTML = "";
@@ -1391,7 +1382,7 @@ function renderizarTablaLiquidez() {
 let graficoLiquidez;
 
 function renderizarGraficaLiquidez() {
-  actualizarCategoriaTDCEnLiquidez();
+
   const liquidez = obtenerLiquidez();
   const total = liquidez.reduce((acc, el) => acc + el.monto, 0);
   document.getElementById("total-liquidez").textContent = `Total: ${formatCurrency(total)}`;
@@ -1455,26 +1446,6 @@ function renderizarGraficaLiquidez() {
   });
 }
 
-function actualizarCategoriaTDCEnLiquidez() {
-  const liquidez = obtenerLiquidez().filter(item => item.categoria !== "TDC");
-  const limites = cargarLimites();
-  const hoy = getToday();
-  const fechaInicioTDC = getMonthCustom(hoy, limites.inicioTDC);
-  const fechaFinTDC = getMonthCustom(sumarDias(fechaInicioTDC, 32), limites.inicioTDC);
-  const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-
-  const gastosTDC = gastos.filter(g =>
-    g.tdc
-    && g.timestamp.slice(0, 10) >= fechaInicioTDC &&
-    g.timestamp.slice(0, 10) < fechaFinTDC
-  );
-
-  const totalGastadoTDC = gastosTDC.reduce((acc, g) => acc + g.monto, 0);
-  const disponibleTDC = Math.max(0, limites.tdc - totalGastadoTDC);
-
-  const nueva = [...liquidez, { categoria: "TDC", monto: disponibleTDC }];
-  localStorage.setItem("liquidez", JSON.stringify(nueva));
-}
 
 let idxEditandoLiquidez = null;
 
@@ -1636,7 +1607,6 @@ document.addEventListener("DOMContentLoaded", () => {
     limites.inicioTDC = +document.getElementById("inicio-tdc").value;
     limites.inicioCompartido = +document.getElementById("inicio-compartido").value;
     localStorage.setItem("limites", JSON.stringify(limites));
-    actualizarCategoriaTDCEnLiquidez();
     volverAPrincipal();
     mostrarVistaResumenBarras();
   });
@@ -1742,7 +1712,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       
       localStorage.setItem("gastos", JSON.stringify(todos));
-      actualizarCategoriaTDCEnLiquidez();
       cerrarFormularioEdicion();
       mostrarVistaResumenBarras();
       renderizarTablaGastos();
@@ -1766,7 +1735,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (idx !== -1) {
       todos.splice(idx, 1);
       localStorage.setItem("gastos", JSON.stringify(todos));
-      actualizarCategoriaTDCEnLiquidez();
       cerrarFormularioEdicion();
       mostrarVistaResumenBarras();
       renderizarTablaGastos();
