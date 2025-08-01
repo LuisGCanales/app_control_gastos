@@ -1799,10 +1799,23 @@ document.addEventListener("DOMContentLoaded", () => {
       g.timestamp === gastoEditando.timestamp &&
       g.concepto === gastoEditando.concepto &&
       g.monto === gastoEditando.monto &&
-      g.tdc === gastoEditando.tdc &&
+      g.medio === gastoEditando.medio &&
       g.compartido === gastoEditando.compartido &&
       g.nota === gastoEditando.nota
     );
+
+    const gasto = todos[idx];
+
+    // Revertir monto al medio anterior
+    if (gasto.medio) {
+      const liquidez = obtenerLiquidez();
+      const i = liquidez.findIndex(item => item.categoria === gasto.medio);
+      if (i !== -1) {
+        liquidez[i].monto += gasto.monto;
+        guardarLiquidez(liquidez);
+      }
+    }
+
     if (idx !== -1) {
       todos.splice(idx, 1);
       localStorage.setItem("gastos", JSON.stringify(todos));
