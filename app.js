@@ -1147,7 +1147,7 @@ function mostrarVistaResumenBarras() {
     if (fecha >= rangos.compartido[0] && fecha < rangos.compartido[1]) {      
       if (g.compartido) resumen.Compartido.gasto += g.monto;
     }
-    if (g.tdc && fecha >= rangos.tdc[0] && fecha < rangos.tdc[1])
+    if (g.medio === "TDC" && fecha >= rangos.tdc[0] && fecha < rangos.tdc[1])
       resumen.TDC.gasto += g.monto;
   });
 
