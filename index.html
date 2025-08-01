@@ -200,7 +200,9 @@
       <label>Concepto: <input type="text" id="editar-concepto" required /></label>
       <label>Monto: <input type="number" id="editar-monto" step="0.01" required /></label>
       <div class="checkboxes-inline">
-        <label><input type="checkbox" id="editar-tdc" class="checkbox-minimal" />TDC</label>
+        <select id="editar-medio" required>
+          <option value="">Selecciona medio...</option>
+        </select>
         <label><input type="checkbox" id="editar-compartido" class="checkbox-minimal" />Compartido</label>
         <label><input type="checkbox" id="editar-fijo" class="checkbox-minimal" />Fijo</label>
       </div>

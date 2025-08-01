@@ -463,12 +463,12 @@ function parsearLineaCSV(linea) {
 
 function exportarCSV() {
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-  const filas = [["timestamp", "monto", "concepto", "tdc", "compartido", "fijo", "nota"],
+  const filas = [["timestamp", "monto", "concepto", "medio", "compartido", "fijo", "nota"],
     ...gastos.map(g => [
       g.timestamp.replace("T", " "),
       g.monto,
       escaparCampoCSV(g.concepto),
-      g.tdc ? "Si" : "No",
+      g.medio || "",
       g.compartido ? "Si" : "No",
       g.fijo ? "Si" : "No",
       escaparCampoCSV(g.nota) || ""
@@ -491,12 +491,12 @@ function importarCSV(e) {
   const reader = new FileReader();
   reader.onload = evt => {
     const nuevos = dividirLineasCSV(evt.target.result).slice(1).map(linea => {
-      const [timestamp, monto, concepto, tdc, compartido, fijo, nota] = parsearLineaCSV(linea);
+      const [timestamp, monto, concepto, medio, compartido, fijo, nota] = parsearLineaCSV(linea);
       return {
         timestamp: timestamp.trim().replace(" ", "T"),
         monto: Number(monto),
         concepto,
-        tdc: (tdc || "").trim() === "Si",
+        medio: (medio || "").trim(),
         compartido: (compartido || "").trim() === "Si",
         fijo: (fijo || "").trim() === "Si",
         nota: (nota || "").trim()
@@ -587,7 +587,6 @@ function renderizarTablaGastos() {
   const mostrarFijos = document.getElementById("filtro-fijos").checked;
   const mostrarVariables = document.getElementById("filtro-variables").checked;
   const filtroMedio = document.getElementById("filtro-medio").value;
-  console.log("filtroMedio", filtroMedio);
   const soloCompartido = document.getElementById("filtro-solo-compartido").checked;
 
   // Filtrado activo
@@ -596,7 +595,6 @@ function renderizarTablaGastos() {
     const esFijo = g.fijo;
     const mostrarPorTipo = (esFijo && mostrarFijos) || (!esFijo && mostrarVariables);
     const pasaMedio = !filtroMedio || g.medio === filtroMedio;
-    console.log("pasaMedio", pasaMedio);
     const pasaCompartido = !soloCompartido || g.compartido;
     const pasaFecha = !fFecha || fecha === fFecha;
     return mostrarPorTipo && pasaCompartido && pasaFecha && pasaMedio;
@@ -670,10 +668,12 @@ function abrirFormularioEdicion(gasto) {
   gastoEditando = gasto;
   document.getElementById("vista-tabla").style.display = "none";
   document.getElementById("modal-edicion").style.display = "block";
+  
+  actualizarOpcionesMedioPago("editar-medio");
 
   document.getElementById("editar-concepto").value = gasto.concepto;
   document.getElementById("editar-monto").value = gasto.monto;
-  document.getElementById("editar-tdc").checked = gasto.tdc;
+  document.getElementById("editar-medio").value = gasto.medio || "";
   document.getElementById("editar-compartido").checked = gasto.compartido;
   document.getElementById("editar-fijo").checked = gasto.fijo || false;
   document.getElementById("editar-fecha").value = gasto.timestamp.slice(0, 10);
@@ -1750,20 +1750,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (idx !== -1) {
       const fecha = document.getElementById("editar-fecha").value;
       const fechaOriginal = gastoEditando.timestamp.slice(0, 10);
-      todos[idx] = {
+
+      const nuevoGasto = {
         concepto: document.getElementById("editar-concepto").value.trim(),
         monto: +document.getElementById("editar-monto").value,
-        tdc: document.getElementById("editar-tdc").checked,
+        medio: document.getElementById("editar-medio").value.trim(),
         compartido: document.getElementById("editar-compartido").checked,
         fijo: document.getElementById("editar-fijo").checked,
         timestamp: fecha === fechaOriginal
           ? gastoEditando.timestamp
           : `${fecha}T23:59:00`,
         nota: document.getElementById("editar-nota").value.trim()
-
       };
-      
+
+      const gastoAnterior = todos[idx];
+      const liquidez = obtenerLiquidez();
+
+      // Revertir al medio anterior
+      if (gastoAnterior.medio) {
+        const iPrev = liquidez.findIndex(l => l.categoria === gastoAnterior.medio);
+        if (iPrev !== -1) liquidez[iPrev].monto += gastoAnterior.monto;
+      }
+
+      // Descontar del nuevo medio
+      if (nuevoGasto.medio) {
+        const iNew = liquidez.findIndex(l => l.categoria === nuevoGasto.medio);
+        if (iNew !== -1) liquidez[iNew].monto -= nuevoGasto.monto;
+      }
+
+      guardarLiquidez(liquidez);
+
+      todos[idx] = nuevoGasto;
       localStorage.setItem("gastos", JSON.stringify(todos));
+
       cerrarFormularioEdicion();
       mostrarVistaResumenBarras();
       renderizarTablaGastos();
