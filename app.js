@@ -1845,10 +1845,12 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     const fijos = obtenerFijosPendientes();
     const fijo = fijos[idx];
  
+    actualizarOpcionesMedioPago("medio-pago-fijo");
+
     // Prellenar formulario del modal de pago
     document.getElementById("pago-fijo-concepto").value = fijo.concepto;
     document.getElementById("pago-fijo-monto").value = fijo.monto;
-    document.getElementById("pago-fijo-tdc").checked = false;
+    document.getElementById("medio-pago-fijo").value = "";
     document.getElementById("pago-fijo-compartido").checked = false;
     document.getElementById("pago-fijo-activar-fecha").checked = false;
     document.getElementById("pago-fijo-fecha-personalizada").value = "";
@@ -1870,7 +1872,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
 
     const concepto = document.getElementById("pago-fijo-concepto").value.trim();
     const monto = +document.getElementById("pago-fijo-monto").value;
-    const tdc = document.getElementById("pago-fijo-tdc").checked;
+    const medio = document.getElementById("medio-pago-fijo").value.trim();
     const compartido = document.getElementById("pago-fijo-compartido").checked;
     const usarFecha = document.getElementById("pago-fijo-activar-fecha").checked;
     const fechaInput = document.getElementById("pago-fijo-fecha-personalizada").value;
@@ -1881,8 +1883,16 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
       : obtenerFechaHoraLocal();
 
     const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-    gastos.push({ concepto, monto, tdc, compartido, fijo: true, timestamp, nota });
+    gastos.push({ concepto, monto, medio, compartido, fijo: true, timestamp, nota });
     localStorage.setItem("gastos", JSON.stringify(gastos));
+
+    // Descontar de liquidez
+    const liquidez = obtenerLiquidez();
+    const idxMedio = liquidez.findIndex(item => item.categoria === medio);
+    if (idxMedio !== -1) {
+      liquidez[idxMedio].monto -= monto;
+      guardarLiquidez(liquidez);
+    }
 
     // Marcar gasto fijo como pagado
     const idx = +document.getElementById("form-pago-fijo").dataset.fijoRelacionado;
