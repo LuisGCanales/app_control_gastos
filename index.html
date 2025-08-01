@@ -15,9 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V52
-
-    </sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V52.2</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -25,16 +23,14 @@
       <datalist id="sugerencias"></datalist>
 
       <input type="number" id="monto" placeholder="Monto" step="0.01" required />
-
-      <textarea id="nota-gasto" rows="2" placeholder="Agrega una nota (opcional)"></textarea>
       
-      <!-- Etiquetas TDC / Compartido / Fijo -->
       <select id="medio-pago" required>
         <option value="">Selecciona medio...</option>
       </select>
-      <div class="switches">
 
-        <!-- Activar fecha personalizada -->
+      <textarea id="nota-gasto" rows="2" placeholder="Agrega una nota (opcional)"></textarea>
+
+      <div class="switches">
         <label class="custom-fecha-label">
           <input type="checkbox" id="activar-fecha" />
           Fecha personalizada
