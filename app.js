@@ -2269,6 +2269,22 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     localStorage.setItem("gastos", JSON.stringify(gastos));
     guardarLiquidez(liquidez);
 
+    // Recalcular límite diario si ya se aplicó hoy
+    if (getToday() === localStorage.getItem("limites_dia_aplicado")) {
+      const conf = JSON.parse(localStorage.getItem("limites"));
+      const todosVars = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
+
+      const nuevoLimite = calcularLimiteDinamicoDiario({
+        gastos: todosVars,
+        limiteSemanal: conf.semana,
+        distribucion: obtenerDistribucionSemanal(),
+        inicioSemana: conf.inicioSemana
+      });
+
+      conf.dia = Math.max(0, Math.round(nuevoLimite));
+      localStorage.setItem("limites", JSON.stringify(conf));
+    }
+
     cerrarModalSobrantes();
     renderizarTablaGastos();
     mostrarVistaResumenBarras();
