@@ -209,48 +209,79 @@ function actualizarLimitesDesdeLiquidezConFeedback() {
 
 
 function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, inicioSemana }) {
-  const hoy = new Date();
-  const diaHoy = hoy.getDay();
+  const unDiaMs = 1000 * 60 * 60 * 24;
+  const hoyISO = getToday();
+  const hoyDate = crearFechaLocal(hoyISO);
+  const diaHoy = hoyDate.getDay();
 
-  // Determina día de inicio de semana más reciente
+  // --- Detectar si estamos en la última semana fraccionaria del periodo mensual ---
+  const conf = JSON.parse(localStorage.getItem("limites")) || { inicioMes: 1, inicioSemana: 6 };
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes); // [inicio, fin)
+  const finPeriodoDate = crearFechaLocal(finPeriodoISO);
+  const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs); // exclusivo de fin
+
+  if (diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7) {
+    // Construimos los días restantes del periodo (incluye hoy, excluye finPeriodo)
+    const diasRestantes = [];
+    for (let i = 0; i < diasRestantesPeriodo; i++) {
+      const d = new Date(hoyDate);
+      d.setDate(d.getDate() + i);
+      diasRestantes.push(d.getDay()); // 0..6
+    }
+
+    // Renormalizar pesos sólo sobre los días restantes; el resto a 0
+    const sumaPesosRestantes = diasRestantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
+    const distribucionEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
+    diasRestantes.forEach(d => {
+      distribucionEspecial[d] = (distribucion[d] || 0) / sumaPesosRestantes;
+    });
+
+    // Usar la liquidez disponible como "limiteSemanal ficticio"
+    const restanteLiquidez = Math.max(0, calcularLiquidezDisponible());
+
+    // Límite diario = proporción de hoy * liquidez restante
+    const limiteDiario = (distribucionEspecial[diaHoy] || 0) * restanteLiquidez;
+    return limiteDiario; // lo redondeas/recortas donde ya lo haces (en cargarLimites)
+  }
+
+  // --- Comportamiento normal (semana completa) ---
+  const hoy = new Date();
+  const diaActual = hoy.getDay();
+
+  // Inicio de semana reciente según tu configuración
   const inicio = new Date(hoy);
-  const offset = (diaHoy - inicioSemana + 7) % 7;
+  const offset = (diaActual - inicioSemana + 7) % 7;
   inicio.setDate(hoy.getDate() - offset);
   inicio.setHours(0, 0, 0, 0);
 
-  // Días en orden de la semana desde inicio
+  // Días de la semana desde el inicio
   const diasSemana = [...Array(7)].map((_, i) => (inicio.getDay() + i) % 7);
 
-  // Día actual en índice relativo al ciclo semanal
-  const hoyRelativo = (diaHoy - inicioSemana + 7) % 7;
-
+  // Índice relativo de hoy
+  const hoyRelativo = (diaActual - inicioSemana + 7) % 7;
   const diasFaltantes = diasSemana.slice(hoyRelativo);
 
-  // Filtrar gastos de esta semana
+  // Ventana de la semana [inicio, inicio+7)
   const fechaInicioISO = toLocalISODate(inicio);
-
   const fechaFinISO = toLocalISODate(new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 7));
-
   const gastosSemana = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO);
 
-  // Agrupar gasto por día de la semana
+  // Gasto por día de la semana
   const gastoPorDia = {};
   gastosSemana.forEach(g => {
-    const fecha = crearFechaLocal(g.timestamp.slice(0, 10));
-    const dia = fecha.getDay();
-    gastoPorDia[dia] = (gastoPorDia[dia] || 0) + g.monto;
+    const f = crearFechaLocal(g.timestamp.slice(0, 10));
+    const d = f.getDay();
+    gastoPorDia[d] = (gastoPorDia[d] || 0) + g.monto;
   });
 
-  // Gasto acumulado hasta ayer
+  // Acumulado hasta ayer
   const gastoAcumulado = diasSemana
-    .slice(0, hoyRelativo) // días anteriores
+    .slice(0, hoyRelativo)
     .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
 
   const restante = limiteSemanal - gastoAcumulado;
-
-  const sumaPorcentajesRestantes = diasFaltantes.reduce((acc, d) => acc + distribucion[d], 0);
-
-  const limiteDiario = (distribucion[diaHoy] / sumaPorcentajesRestantes) * restante;
+  const sumaPorcentajesRestantes = diasFaltantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
+  const limiteDiario = ((distribucion[diaActual] || 0) / sumaPorcentajesRestantes) * Math.max(0, restante);
 
   return limiteDiario;
 }
