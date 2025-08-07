@@ -214,14 +214,15 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
   const hoyDate = crearFechaLocal(hoyISO);
   const diaHoy = hoyDate.getDay();
 
-  // --- Detectar si estamos en la última semana fraccionaria del periodo mensual ---
-  const conf = JSON.parse(localStorage.getItem("limites")) || { inicioMes: 1, inicioSemana: 6 };
-  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes); // [inicio, fin)
+  // --- ¿Estamos en la última semana fraccionaria del periodo mensual? ---
+  const confLocal = JSON.parse(localStorage.getItem("limites")) || { inicioMes: 1, inicioSemana: 6 };
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), confLocal.inicioMes); // [inicio, fin)
   const finPeriodoDate = crearFechaLocal(finPeriodoISO);
-  const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs); // exclusivo de fin
+  const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs); // 1..6 => fraccionaria
+  const enUltimaSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
 
-  if (diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7) {
-    // Construimos los días restantes del periodo (incluye hoy, excluye finPeriodo)
+  if (enUltimaSemanaFracc) {
+    // Días restantes del periodo (incluye hoy, excluye fin)
     const diasRestantes = [];
     for (let i = 0; i < diasRestantesPeriodo; i++) {
       const d = new Date(hoyDate);
@@ -229,26 +230,28 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
       diasRestantes.push(d.getDay()); // 0..6
     }
 
-    // Renormalizar pesos sólo sobre los días restantes; el resto a 0
-    const sumaPesosRestantes = diasRestantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
-    const distribucionEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
+    // Renormalizar pesos SOLO sobre días restantes; el resto a 0
+    const sumaPesosRest = diasRestantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
+    const distribEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
     diasRestantes.forEach(d => {
-      distribucionEspecial[d] = (distribucion[d] || 0) / sumaPesosRestantes;
+      distribEspecial[d] = (distribucion[d] || 0) / sumaPesosRest;
     });
 
-    // Usar la liquidez disponible como "limiteSemanal ficticio"
-    const restanteLiquidez = Math.max(0, calcularLiquidezDisponible());
+    // Usar la liquidez disponible como "semana ficticia" y grabarla en limites.semana
+    const liquidezRestante = Math.max(0, calcularLiquidezDisponible());
+    const limites = JSON.parse(localStorage.getItem("limites")) || {};
+    limites.semana = Math.floor(liquidezRestante);
+    localStorage.setItem("limites", JSON.stringify(limites));
 
-    // Límite diario = proporción de hoy * liquidez restante
-    const limiteDiario = (distribucionEspecial[diaHoy] || 0) * restanteLiquidez;
-    return limiteDiario; // lo redondeas/recortas donde ya lo haces (en cargarLimites)
+    // Límite diario = proporción de HOY * liquidez restante
+    return (distribEspecial[diaHoy] || 0) * liquidezRestante;
   }
 
   // --- Comportamiento normal (semana completa) ---
   const hoy = new Date();
   const diaActual = hoy.getDay();
 
-  // Inicio de semana reciente según tu configuración
+  // Inicio de semana más reciente según configuración
   const inicio = new Date(hoy);
   const offset = (diaActual - inicioSemana + 7) % 7;
   inicio.setDate(hoy.getDate() - offset);
@@ -257,16 +260,16 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
   // Días de la semana desde el inicio
   const diasSemana = [...Array(7)].map((_, i) => (inicio.getDay() + i) % 7);
 
-  // Índice relativo de hoy
+  // Índice relativo de hoy y días faltantes
   const hoyRelativo = (diaActual - inicioSemana + 7) % 7;
   const diasFaltantes = diasSemana.slice(hoyRelativo);
 
-  // Ventana de la semana [inicio, inicio+7)
+  // Ventana semanal [inicio, inicio+7)
   const fechaInicioISO = toLocalISODate(inicio);
   const fechaFinISO = toLocalISODate(new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 7));
   const gastosSemana = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO);
 
-  // Gasto por día de la semana
+  // Gasto por día
   const gastoPorDia = {};
   gastosSemana.forEach(g => {
     const f = crearFechaLocal(g.timestamp.slice(0, 10));
@@ -281,9 +284,8 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
 
   const restante = limiteSemanal - gastoAcumulado;
   const sumaPorcentajesRestantes = diasFaltantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
-  const limiteDiario = ((distribucion[diaActual] || 0) / sumaPorcentajesRestantes) * Math.max(0, restante);
 
-  return limiteDiario;
+  return ((distribucion[diaActual] || 0) / sumaPorcentajesRestantes) * Math.max(0, restante);
 }
 
 function cargarLimites() {
