@@ -606,12 +606,13 @@ function importarCSV(e) {
     const hoy = getToday();
     const ultimaAplicacion = localStorage.getItem("limites_dia_aplicado");
 
+
     if (hoy === ultimaAplicacion) {
       const conf = JSON.parse(localStorage.getItem("limites"));
-      const gastos = nuevos.filter(g => !g.fijo);
+      const todosVars = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
 
       const nuevoLimite = calcularLimiteDinamicoDiario({
-        gastos,
+        gastos: todosVars,
         limiteSemanal: conf.semana,
         distribucion: obtenerDistribucionSemanal(),
         inicioSemana: conf.inicioSemana
