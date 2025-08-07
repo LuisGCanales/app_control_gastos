@@ -1678,6 +1678,7 @@ function renderizarDistribucionSemanal() {
   // ---------------------------
   // Tabla "Distribución Ajustada (días restantes)"
   // ---------------------------
+  // --- Distribución Ajustada (última semana fraccionaria) comenzando HOY ---
   if (enUltimaSemanaFracc) {
     // Construir distribución especial: ceros fuera del periodo y renormalizar sobre días restantes
     const distribucionEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
@@ -1692,13 +1693,17 @@ function renderizarDistribucionSemanal() {
       distribucionEspecial[d] = (distribucion[d] || 0) / sumaPesosRestantes;
     });
 
-    // Pintar SIETE filas (0..6), con ceros para días fuera del periodo
-    for (let i = 0; i < 7; i++) {
-      const prop = distribucionEspecial[i] || 0;
+    // 🔽 Imprimir SOLO los días restantes, en orden desde HOY
+    for (let i = 0; i < diasRestantesPeriodo; i++) {
+      const d = new Date(hoy);
+      d.setDate(d.getDate() + i);
+      const dow = d.getDay();
+      const prop = distribucionEspecial[dow] || 0;
       const monto = prop * limiteSemanalMostrar;
+
       const row = `
         <tr>
-          <td>${diasNombres[i]}</td>
+          <td>${diasNombres[dow]}</td>
           <td>${(prop * 100).toFixed(2)}%</td>
           <td>${formatCurrency(monto)}</td>
         </tr>`;
