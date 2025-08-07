@@ -1425,6 +1425,7 @@ function abrirModalLiquidez() {
 function cerrarModalLiquidez() {
   document.getElementById("modal-liquidez").style.display = "none";
   document.getElementById("vista-liquidez").style.display = "block";
+  renderizarGraficaLiquidez();
 }
 
 function renderizarTablaLiquidez() {
