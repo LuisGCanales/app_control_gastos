@@ -159,44 +159,55 @@ function obtenerDiasResiduales(fechaInicioISO, totalDiasPeriodo) {
   return diasResiduales;
 }
  
+// Reemplaza tu función completa por esta:
 function actualizarLimitesDesdeLiquidez() {
-  
-  const limites = cargarLimites();
+  const limites = cargarLimites(); // trae lo actual y pinta inputs
   const distribucion = obtenerDistribucionSemanal();
-  
-  const hoy = getToday();
-  
-  const fechaFin = getMonthCustom(sumarDias(hoy, 32), limites.inicioMes);
-  
-  const diasPeriodo = (crearFechaLocal(fechaFin) - crearFechaLocal(hoy)) / (1000 * 60 * 60 * 24);
-  const semanasCompletas = Math.floor(diasPeriodo / 7); 
-  const diasResiduales = obtenerDiasResiduales(hoy, diasPeriodo);
-  const sumaProporcionesResiduales = diasResiduales.reduce((acc, d) => acc + distribucion[d], 0);  
-  const liquidezDisponible = calcularLiquidezDisponible(); // ← nueva función
-  const divisor = semanasCompletas + sumaProporcionesResiduales;    
-  const limiteSemanal = liquidezDisponible / divisor;
-  
-  // Obtener liquidez actual
+
+  // 1) Fijar el inicio de semana en HOY (0=Dom ... 6=Sáb)
+  const hoyISO = getToday();
+  const inicioSemanaHoy = new Date().getDay();
+  limites.inicioSemana = inicioSemanaHoy;
+
+  // (opcional pero útil): reflejar en el input de config
+  const inputInicioSemana = document.getElementById("inicio-semana");
+  if (inputInicioSemana) inputInicioSemana.value = inicioSemanaHoy;
+
+  // Persistir de inmediato el cambio de inicioSemana para que todo lo que
+  // venga (incl. cargarLimites más abajo) ya use este valor
+  localStorage.setItem("limites", JSON.stringify(limites));
+
+  // 2) Calcular el límite semanal/mensual con tu lógica actual
+  const fechaFin = getMonthCustom(sumarDias(hoyISO, 32), limites.inicioMes);
+
+  const diasPeriodo = (crearFechaLocal(fechaFin) - crearFechaLocal(hoyISO)) / (1000 * 60 * 60 * 24);
+  const semanasCompletas = Math.floor(diasPeriodo / 7);
+  const diasResiduales = obtenerDiasResiduales(hoyISO, diasPeriodo);
+  const sumaProporcionesResiduales = diasResiduales.reduce((acc, d) => acc + distribucion[d], 0);
+
+  const liquidezDisponible = calcularLiquidezDisponible();
+  const divisor = semanasCompletas + sumaProporcionesResiduales;
+  const limiteSemanal = liquidezDisponible / (divisor || 1); // evita /0 si quedara 0 por alguna razón
+
+  // Liquidez actual y gastos del periodo para reconstruir el mensual
   const liquidez = obtenerLiquidez();
   const totalLiquidez = liquidez.reduce((acc, item) => acc + item.monto, 0);
-
-  // Obtener gastos del periodo
-  const fechaInicioPeriodo = getMonthCustom(hoy, limites.inicioMes);
+  const fechaInicioPeriodo = getMonthCustom(hoyISO, limites.inicioMes);
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   const gastosPeriodo = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioPeriodo);
   const totalgastosPeriodo = gastosPeriodo.reduce((acc, g) => acc + g.monto, 0);
 
-  // Obtener liquidez al inicio del periodo
-  const liquidezInicial = totalLiquidez + totalgastosPeriodo
+  const liquidezInicial = totalLiquidez + totalgastosPeriodo;
 
-  // Actualiza y guarda los nuevos límites
+  // 3) Guardar nuevos límites base (ojo: si estás en última semana fraccionaria,
+  //    calcularLimiteDinamicoDiario luego sobreescribirá 'semana' con la liquidez disponible)
   limites.mes = Math.floor(liquidezInicial);
   limites.semana = Math.floor(limiteSemanal);
   localStorage.setItem("limites", JSON.stringify(limites));
 
-  // Forzar recálculo de límite diario hoy
+  // 4) Forzar recálculo del límite diario para HOY con el nuevo inicio de semana
   localStorage.removeItem("limites_dia_aplicado");
-  cargarLimites();
+  cargarLimites();            // esto recalcula 'dia' usando el nuevo inicioSemana
   mostrarVistaResumenBarras();
 }
 
