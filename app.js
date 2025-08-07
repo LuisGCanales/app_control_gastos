@@ -218,6 +218,15 @@ function actualizarLimitesDesdeLiquidezConFeedback() {
   setTimeout(() => msg.textContent = "", 2500);
 }
 
+function esUltimaSemanaFraccionaria(hoyISO, inicioMes) {
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), inicioMes); // [inicio, fin)
+  const hoy = crearFechaLocal(hoyISO);
+  const fin = crearFechaLocal(finPeriodoISO);
+  const msDia = 1000 * 60 * 60 * 24;
+  const diasRestantes = Math.floor((fin - hoy) / msDia); // 1..6 => fraccionaria
+  return diasRestantes > 0 && diasRestantes < 7;
+}
+
 
 function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, inicioSemana }) {
   const unDiaMs = 1000 * 60 * 60 * 24;
@@ -225,62 +234,48 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
   const hoyDate = crearFechaLocal(hoyISO);
   const diaHoy = hoyDate.getDay();
 
-  // --- ¿Estamos en la última semana fraccionaria del periodo mensual? ---
+  // --- última semana fraccionaria ---
   const confLocal = JSON.parse(localStorage.getItem("limites")) || { inicioMes: 1, inicioSemana: 6 };
-  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), confLocal.inicioMes); // [inicio, fin)
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), confLocal.inicioMes);
   const finPeriodoDate = crearFechaLocal(finPeriodoISO);
-  const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs); // 1..6 => fraccionaria
+  const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs);
   const enUltimaSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
 
   if (enUltimaSemanaFracc) {
-    // Días restantes del periodo (incluye hoy, excluye fin)
+    // días restantes del periodo (incluye hoy, excluye fin)
     const diasRestantes = [];
     for (let i = 0; i < diasRestantesPeriodo; i++) {
       const d = new Date(hoyDate);
       d.setDate(d.getDate() + i);
-      diasRestantes.push(d.getDay()); // 0..6
+      diasRestantes.push(d.getDay());
     }
-
-    // Renormalizar pesos SOLO sobre días restantes; el resto a 0
+    // renormalizar pesos sobre días restantes
     const sumaPesosRest = diasRestantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
     const distribEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
-    diasRestantes.forEach(d => {
-      distribEspecial[d] = (distribucion[d] || 0) / sumaPesosRest;
-    });
+    diasRestantes.forEach(d => { distribEspecial[d] = (distribucion[d] || 0) / sumaPesosRest; });
 
-    // Usar la liquidez disponible como "semana ficticia" y grabarla en limites.semana
+    // límite diario = proporción de HOY * liquidez restante (semana ficticia)
     const liquidezRestante = Math.max(0, calcularLiquidezDisponible());
-    const limites = JSON.parse(localStorage.getItem("limites")) || {};
-    limites.semana = Math.floor(liquidezRestante);
-    localStorage.setItem("limites", JSON.stringify(limites));
-
-    // Límite diario = proporción de HOY * liquidez restante
     return (distribEspecial[diaHoy] || 0) * liquidezRestante;
   }
 
-  // --- Comportamiento normal (semana completa) ---
+  // --- comportamiento normal (semana completa) ---
   const hoy = new Date();
   const diaActual = hoy.getDay();
 
-  // Inicio de semana más reciente según configuración
   const inicio = new Date(hoy);
   const offset = (diaActual - inicioSemana + 7) % 7;
   inicio.setDate(hoy.getDate() - offset);
   inicio.setHours(0, 0, 0, 0);
 
-  // Días de la semana desde el inicio
   const diasSemana = [...Array(7)].map((_, i) => (inicio.getDay() + i) % 7);
-
-  // Índice relativo de hoy y días faltantes
   const hoyRelativo = (diaActual - inicioSemana + 7) % 7;
   const diasFaltantes = diasSemana.slice(hoyRelativo);
 
-  // Ventana semanal [inicio, inicio+7)
   const fechaInicioISO = toLocalISODate(inicio);
   const fechaFinISO = toLocalISODate(new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 7));
   const gastosSemana = gastos.filter(g => g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO);
 
-  // Gasto por día
   const gastoPorDia = {};
   gastosSemana.forEach(g => {
     const f = crearFechaLocal(g.timestamp.slice(0, 10));
@@ -288,7 +283,6 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
     gastoPorDia[d] = (gastoPorDia[d] || 0) + g.monto;
   });
 
-  // Acumulado hasta ayer
   const gastoAcumulado = diasSemana
     .slice(0, hoyRelativo)
     .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
@@ -299,26 +293,39 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
   return ((distribucion[diaActual] || 0) / sumaPorcentajesRestantes) * Math.max(0, restante);
 }
 
+
 function cargarLimites() {
   const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 6, inicioMes: 12, inicioTDC: 12, inicioCompartido: 1 };
-  const hoy = getToday()
+  const hoy = getToday();
   const ultimaFechaAplicada = localStorage.getItem("limites_dia_aplicado");
 
+  // Cargar configuración actual
   const conf = JSON.parse(localStorage.getItem("limites")) || predet;
 
-  // Si es un nuevo día, actualiza el límite diario automáticamente
+  // ✅ NUEVO: si estamos en última semana fraccionaria, forzar semana = liquidez disponible
+  if (esUltimaSemanaFraccionaria(hoy, conf.inicioMes)) {
+    conf.semana = Math.floor(Math.max(0, calcularLiquidezDisponible()));
+  }
+
+  // Si es un nuevo día, recalcula el límite diario automáticamente
   if (hoy !== ultimaFechaAplicada) {
     const gastos = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
     const limiteCalculado = calcularLimiteDinamicoDiario({
       gastos,
-      limiteSemanal: conf.semana,
+      limiteSemanal: conf.semana,               // <- ya viene forzado si aplica
       distribucion: obtenerDistribucionSemanal(),
       inicioSemana: conf.inicioSemana
     });
+
     conf.dia = Math.max(0, Math.round(limiteCalculado)); // evita negativos
     localStorage.setItem("limites", JSON.stringify(conf));
-    localStorage.setItem("limites_dia_aplicado", hoy); 
+    localStorage.setItem("limites_dia_aplicado", hoy);
+  } else {
+    // ✅ NUEVO: aunque no sea nuevo día, persiste 'semana' si la acabamos de forzar
+    localStorage.setItem("limites", JSON.stringify(conf));
   }
+
+  // Reflejar en inputs
   ["dia", "semana", "mes", "compartido", "tdc"].forEach(c =>
     document.getElementById(`limite-${c}`).value = conf[c]
   );
