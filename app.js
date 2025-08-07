@@ -1757,16 +1757,40 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("gasto-form").addEventListener("submit", agregarGasto);
   document.getElementById("config-form").addEventListener("submit", e => {
     e.preventDefault();
+    
     const campos = ["dia", "semana", "mes", "compartido", "tdc"];
-    const limites = Object.fromEntries(campos.map(c => [c, +document.getElementById(`limite-${c}`).value]));
-    limites.inicioSemana = +document.getElementById("inicio-semana").value;
-    limites.inicioMes = +document.getElementById("inicio-mes").value;
-    limites.inicioTDC = +document.getElementById("inicio-tdc").value;
-    limites.inicioCompartido = +document.getElementById("inicio-compartido").value;
-    localStorage.setItem("limites", JSON.stringify(limites));
+    const nuevosLimites = Object.fromEntries(campos.map(c => [c, +document.getElementById(`limite-${c}`).value]));
+
+    // Cargar límites anteriores para comparar
+    const limitesPrevios = JSON.parse(localStorage.getItem("limites")) || {};
+
+    nuevosLimites.inicioSemana = +document.getElementById("inicio-semana").value;
+    nuevosLimites.inicioMes = +document.getElementById("inicio-mes").value;
+    nuevosLimites.inicioTDC = +document.getElementById("inicio-tdc").value;
+    nuevosLimites.inicioCompartido = +document.getElementById("inicio-compartido").value;
+
+    // Actualizar liquidez TDC si cambió el límite
+    const diferenciaTDC = nuevosLimites.tdc - (limitesPrevios.tdc || 0);
+    if (diferenciaTDC !== 0) {
+      const liquidez = obtenerLiquidez();
+      const idx = liquidez.findIndex(l => l.categoria === "TDC");
+
+      if (idx !== -1) {
+        liquidez[idx].monto += diferenciaTDC;
+      } else {
+        liquidez.push({ categoria: "TDC", monto: diferenciaTDC });
+      }
+
+      guardarLiquidez(liquidez);
+    }
+
+    // Guardar nuevos límites
+    localStorage.setItem("limites", JSON.stringify(nuevosLimites));
+
     volverAPrincipal();
     mostrarVistaResumenBarras();
   });
+
   document.getElementById("form-fijos-pendientes").addEventListener("submit", e => {
     e.preventDefault();
     const concepto = document.getElementById("nuevo-fijo-concepto").value.trim();
