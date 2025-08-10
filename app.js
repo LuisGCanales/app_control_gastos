@@ -1849,6 +1849,57 @@ function cerrarModalSobrantes() {
   document.getElementById("vista-tabla").style.display = "block";
 }
 
+
+function descargarBlob(nombre, contenido, mime = "text/plain;charset=utf-8;") {
+  const blob = new Blob([contenido], { type: mime });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = nombre;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportarConfigYLiquidezJSON() {
+  const predet = { dia: 700, semana: 3000, mes: 30000, compartido: 3000, tdc: 30000, inicioSemana: 6, inicioMes: 12, inicioTDC: 12, inicioCompartido: 1 };
+  const limites = JSON.parse(localStorage.getItem("limites")) || predet;
+  const liquidez = obtenerLiquidez();
+  const distribucionSemanal = obtenerDistribucionSemanal(); // ← NEW
+  const fecha = getToday();
+
+  const payload = {
+    fecha_export: fecha,
+    limites,
+    liquidez,
+    distribucionSemanal  // ← NEW
+  };
+
+  const json = JSON.stringify(payload, null, 2);
+  descargarBlob(`config_liquidez_${fecha}.json`, json, "application/json;charset=utf-8;");
+}
+
+function dispararExportacionAutomaticaDiaria() {
+  const ahora = new Date();
+  if (ahora.getHours() < 4) return; // solo después de las 04:00
+
+  const hoy = getToday();
+  const KEY = "auto_export_last_date";
+  const ultima = localStorage.getItem(KEY);
+  if (ultima === hoy) return; // ya exportamos hoy
+
+  try {
+    // Histórico completo:
+    exportarCSV();              // ya pone nombre gastos_YYYY-MM-DD.csv
+    exportarFijosCSV();         // ya pone nombre gastos_fijos_YYYY-MM-DD.csv
+    exportarConfigYLiquidezJSON(); // config_liquidez_YYYY-MM-DD.json
+
+    localStorage.setItem(KEY, hoy);
+    console.log(`✅ Exportación automática completada (${hoy})`);
+  } catch (e) {
+    console.error("❌ Error en exportación automática:", e);
+  }
+}
+
+
 // === INICIALIZACIÓN ===
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -2369,5 +2420,5 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     mostrarVistaResumenBarras();
   });
 
-
+  dispararExportacionAutomaticaDiaria();
 });
