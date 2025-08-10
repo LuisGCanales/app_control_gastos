@@ -2148,6 +2148,7 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
     document.getElementById("modal-edicion-fijo").style.display = "none";
     document.getElementById("modal-pago-fijo").style.display = "block";
     history.pushState({ vista: "modal-pago-fijo" }, "", "#modal-pago-fijo");
+    autoExpand({ target: document.getElementById("pago-fijo-nota") });
 
   });
 
