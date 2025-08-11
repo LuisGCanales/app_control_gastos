@@ -17,7 +17,7 @@ body {
 ======================================== */
 
 .container {
-  max-width: 420px;
+  max-width: 500px;
   margin: 0em auto;
   padding: 2em;
   background-color: rgba(15, 15, 15, 0.75);
