@@ -178,7 +178,7 @@ function actualizarLimitesDesdeLiquidez() {
   localStorage.setItem("limites", JSON.stringify(limites));
 
   // 2) Calcular el límite semanal/mensual con tu lógica actual
-  const fechaFin = getMonthCustom(sumarDias(hoyISO, 32), limites.inicioMes);
+  const fechaFin = getMonthCustom(sumarDias(hoyISO, 31), limites.inicioMes);
 
   const diasPeriodo = (crearFechaLocal(fechaFin) - crearFechaLocal(hoyISO)) / (1000 * 60 * 60 * 24);
   const semanasCompletas = Math.floor(diasPeriodo / 7);
@@ -219,7 +219,7 @@ function actualizarLimitesDesdeLiquidezConFeedback() {
 }
 
 function esUltimaSemanaFraccionaria(hoyISO, inicioMes) {
-  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), inicioMes); // [inicio, fin)
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 31), inicioMes); // [inicio, fin)
   const hoy = crearFechaLocal(hoyISO);
   const fin = crearFechaLocal(finPeriodoISO);
   const msDia = 1000 * 60 * 60 * 24;
@@ -236,7 +236,7 @@ function calcularLimiteDinamicoDiario({ gastos, limiteSemanal, distribucion, ini
 
   // --- última semana fraccionaria ---
   const confLocal = JSON.parse(localStorage.getItem("limites")) || { inicioMes: 1, inicioSemana: 6 };
-  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), confLocal.inicioMes);
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 31), confLocal.inicioMes);
   const finPeriodoDate = crearFechaLocal(finPeriodoISO);
   const diasRestantesPeriodo = Math.floor((finPeriodoDate - hoyDate) / unDiaMs);
   const enUltimaSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
@@ -690,7 +690,7 @@ function renderizarTablaGastos() {
   const hoy = getToday();
   const conf = cargarLimites();
   const inicioPeriodo = getMonthCustom(hoy, conf.inicioMes);
-  const finPeriodo = getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes);
+  const finPeriodo = getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 31), conf.inicioMes);
 
   let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
 
@@ -1035,7 +1035,7 @@ function mostrarVistaGraficas() {
   const conf = cargarLimites();
   const hoy = getToday();
   const inicioPeriodo = getMonthCustom(hoy, conf.inicioMes);
-  const finPeriodo = getMonthCustom(sumarDias(inicioPeriodo, 32), conf.inicioMes);
+  const finPeriodo = getMonthCustom(sumarDias(inicioPeriodo, 31), conf.inicioMes);
   const mostrarPeriodoActual = document.getElementById("switch-periodo-actual")?.checked ?? false;
 
   const agrupados = {};
@@ -1237,14 +1237,14 @@ function mostrarVistaResumenBarras() {
   const hoy = getToday();
   const gastos = JSON.parse(localStorage.getItem("gastos")) || [];
   const fijosPendientes = obtenerFijosPendientes().filter(g => g.estado === "pendiente");
-  const fijosDesdeFormulario = gastos.filter(g => g.fijo && g.timestamp.slice(0, 10) >= getMonthCustom(hoy, conf.inicioMes) && g.timestamp.slice(0, 10) < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes));
+  const fijosDesdeFormulario = gastos.filter(g => g.fijo && g.timestamp.slice(0, 10) >= getMonthCustom(hoy, conf.inicioMes) && g.timestamp.slice(0, 10) < getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 31), conf.inicioMes));
 
   const rangos = {
     dia: [hoy, hoy],
     semana: [getWeekCustom(hoy, conf.inicioSemana), sumarDias(getWeekCustom(hoy, conf.inicioSemana), 7)],
-    mes: [getMonthCustom(hoy, conf.inicioMes), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 32), conf.inicioMes)],
-    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 32), conf.inicioTDC)],
-    compartido: [getMonthCustom(hoy, conf.inicioCompartido), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioCompartido), 32), conf.inicioCompartido)]
+    mes: [getMonthCustom(hoy, conf.inicioMes), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioMes), 31), conf.inicioMes)],
+    tdc: [getMonthCustom(hoy, conf.inicioTDC), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioTDC), 31), conf.inicioTDC)],
+    compartido: [getMonthCustom(hoy, conf.inicioCompartido), getMonthCustom(sumarDias(getMonthCustom(hoy, conf.inicioCompartido), 31), conf.inicioCompartido)]
   };
 
   const resumen = {
@@ -1636,7 +1636,7 @@ function renderizarDistribucionSemanal() {
   const hoyISO = getToday();
   const hoy = crearFechaLocal(hoyISO);
 
-  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes); // [inicio, fin)
+  const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 31), conf.inicioMes); // [inicio, fin)
   const finPeriodo = crearFechaLocal(finPeriodoISO);
   const msDia = 1000 * 60 * 60 * 24;
   const diasRestantesPeriodo = Math.floor((finPeriodo - hoy) / msDia);
@@ -1673,7 +1673,7 @@ function renderizarDistribucionSemanal() {
     // Detectar última semana fraccionaria y construir serie AJUSTADA desde HOY
     const hoyISO = getToday();
     const hoy = crearFechaLocal(hoyISO);
-    const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes);
+    const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 31), conf.inicioMes);
     const fin = crearFechaLocal(finPeriodoISO);
     const diasRestantesPeriodo = Math.floor((fin - hoy) / (1000*60*60*24));
     const enUltSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
