@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V56.3</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V56.4</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -30,11 +30,12 @@
 
       <textarea id="nota-gasto" rows="2" placeholder="Agrega una nota (opcional)"></textarea>
 
-      <div class="switches">
-        <label class="custom-fecha-label">
+      <div class="switches switches--row">
+        <div class="checkbox-wrapper-17">
           <input type="checkbox" id="activar-fecha" />
-          Fecha personalizada
-        </label>
+          <label for="activar-fecha" title="Usar fecha personalizada"></label>
+          <span class="switch-label">Fecha personalizada</span>
+        </div>
 
         <div class="checkbox-wrapper-17">
           <input type="checkbox" id="compartido" />
