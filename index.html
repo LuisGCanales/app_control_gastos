@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V56.5</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V56.6</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -142,30 +142,34 @@
     <!-- Filtros -->
     <div id="filtros-gastos" style="margin-top: 2em;">
       <label>Filtrar por fecha: <input type="date" id="filtro-fecha" /></label>
-      <div class="switches-group">
-        <div class="switches filtros-switches">
-          <div class="checkbox-wrapper-17">
-            <input type="checkbox" id="filtro-fijos"/>
-            <label for="filtro-fijos" title="Mostrar fijos"></label>
-            <span class="switch-label">Fijos</span>
-          </div>
-          <div class="checkbox-wrapper-17">
-            <input type="checkbox" id="filtro-variables" checked />
-            <label for="filtro-variables" title="Mostrar variables"></label>
-            <span class="switch-label">Variables</span>
-          </div>
+
+      <!-- Fila con 3 switches en línea -->
+      <div class="switches switches--row">
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="filtro-fijos"/>
+          <label for="filtro-fijos" title="Mostrar fijos"></label>
+          <span class="switch-label">Fijos</span>
         </div>
-        <div class="switches filtros-switches">
-          <label for="filtro-medio">Medio:</label>
-          <select id="filtro-medio">
-            <option value="">Todos</option>
-          </select>
-          <div class="checkbox-wrapper-17">
-            <input type="checkbox" id="filtro-solo-compartido" />
-            <label for="filtro-solo-compartido" title="Solo compartidos"></label>
-            <span class="switch-label">Solo compartido</span>
-          </div>
+
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="filtro-variables" checked />
+          <label for="filtro-variables" title="Mostrar variables"></label>
+          <span class="switch-label">Variables</span>
         </div>
+
+        <div class="checkbox-wrapper-17">
+          <input type="checkbox" id="filtro-solo-compartido" />
+          <label for="filtro-solo-compartido" title="Solo compartidos"></label>
+          <span class="switch-label">Solo compartido</span>
+        </div>
+      </div>
+
+      <!-- Línea aparte para el select de Medio -->
+      <div class="filtro-medio-linea">
+        <label for="filtro-medio">Medio:</label>
+        <select id="filtro-medio">
+          <option value="">Todos</option>
+        </select>
       </div>
       <button id="limpiar-filtros" style="margin-top: 1em;">Limpiar filtros</button>
     </div>

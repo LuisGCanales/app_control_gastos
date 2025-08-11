@@ -627,3 +627,8 @@ option {
   background-color: #1e1e1e;
   color: rgba(242, 242, 242, 0.6);
 }
+
+select#filtro-medio {
+ background: rgba(255, 255, 255, 0.08); 
+box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
+}
