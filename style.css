@@ -633,5 +633,59 @@ select#filtro-medio {
 box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 }
 
-#vista-tabla { max-width: 100vw; }
-#tabla-gastos { width: 100%; table-layout: auto; }
+/* --- Tabla de gastos: que SIEMPRE quepa en el container --- */
+#vista-tabla #tabla-gastos {
+  table-layout: fixed;   /* columnas con ancho fijo */
+  width: 100%;           /* nunca más ancho que el container */
+}
+
+/* Anchos por columna (suman 100%) */
+#vista-tabla #tabla-gastos th:nth-child(1),
+#vista-tabla #tabla-gastos td:nth-child(1) { /* Concepto */
+  width: 48%;
+  overflow-wrap: anywhere;   /* parte palabras largas */
+  word-break: break-word;
+}
+
+#vista-tabla #tabla-gastos th:nth-child(2),
+#vista-tabla #tabla-gastos td:nth-child(2) { /* Monto */
+  width: 20%;
+}
+
+#vista-tabla #tabla-gastos th:nth-child(3),
+#vista-tabla #tabla-gastos td:nth-child(3) { /* Medio */
+  width: 18%;
+}
+
+#vista-tabla #tabla-gastos th:nth-child(4),
+#vista-tabla #tabla-gastos td:nth-child(4) { /* C. */
+  width: 7%;
+}
+
+#vista-tabla #tabla-gastos th:nth-child(5),
+#vista-tabla #tabla-gastos td:nth-child(5) { /* F. */
+  width: 5%;
+}
+
+/* Columna del botón editar: hazla mínima */
+#vista-tabla #tabla-gastos th:nth-child(6),
+#vista-tabla #tabla-gastos td:nth-child(6) {
+  width: 2%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Ajuste de padding y tamaño en pantallas muy pequeñas */
+@media (max-width: 420px) {
+  #vista-tabla #tabla-gastos th,
+  #vista-tabla #tabla-gastos td {
+    padding: 0.4em 0.35em;
+    font-size: 0.9em;
+  }
+}
+
+/* Plan B: si aun así algo quisiera desbordar, que el SCROLL sea del contenedor de la vista,
+   no del body (evita “mini-zoom”/centrado raro) */
+#vista-tabla {
+  overflow-x: auto;
+}
