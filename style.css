@@ -17,7 +17,7 @@ body {
 ======================================== */
 
 .container {
-  width: 100vw;
+  width: 50vw;
   margin: 0em auto;
   padding: 2em;
   background-color: rgba(15, 15, 15, 0.75);
