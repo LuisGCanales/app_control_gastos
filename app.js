@@ -1766,7 +1766,7 @@ function renderizarDistribucionSemanal() {
               weight: "bold",
               size: 10
             },
-            rotation: -30,
+            rotation: -10,
             clip: false
           }
         }
