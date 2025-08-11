@@ -607,6 +607,7 @@ select {
   border-radius: 8px;
   border: none;
   background: rgba(76, 48, 31, 0.25); /* café translúcido */
+  box-shadow: 0 0 0 2px rgba(255, 127, 68, 0.1); /* rojo suave */
   color: rgba(242, 242, 242, 0.6);
   box-sizing: border-box;
   font-family: inherit;
