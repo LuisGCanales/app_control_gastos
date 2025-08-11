@@ -635,4 +635,3 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 
 #vista-tabla { max-width: 100vw; }
 #tabla-gastos { width: 100%; table-layout: auto; }
-#tabla-gastos th, #tabla-gastos td { word-break: break-word; }
