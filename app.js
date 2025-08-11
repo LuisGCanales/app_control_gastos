@@ -1639,11 +1639,11 @@ function renderizarDistribucionSemanal() {
   const hoy = crearFechaLocal(hoyISO);
   const diaHoy = hoy.getDay();
 
-  const tbodyOriginal = document.querySelector("#tabla-distribucion-original tbody");
-  const tbodyAjustada = document.querySelector("#tabla-distribucion-ajustada tbody");
+  // const tbodyOriginal = document.querySelector("#tabla-distribucion-original tbody");
+  // const tbodyAjustada = document.querySelector("#tabla-distribucion-ajustada tbody");
 
-  tbodyOriginal.innerHTML = "";
-  tbodyAjustada.innerHTML = "";
+  // tbodyOriginal.innerHTML = "";
+  // tbodyAjustada.innerHTML = "";
 
   // ---------------------------
   // Detectar última semana fraccionaria del periodo mensual
@@ -1667,20 +1667,20 @@ function renderizarDistribucionSemanal() {
   // ---------------------------
   // Tabla "Distribución Original" (siempre con los pesos actuales)
   // ---------------------------
-  let totalOriginal = 0;
-  for (let i = 0; i < 7; i++) {
-    const prop = distribucion[i] || 0;
-    const monto = prop * limiteSemanalMostrar; // usamos el "mostrar" para que sea consistente visualmente
-    totalOriginal += monto;
+  // let totalOriginal = 0;
+  // for (let i = 0; i < 7; i++) {
+  //   const prop = distribucion[i] || 0;
+  //   const monto = prop * limiteSemanalMostrar; // usamos el "mostrar" para que sea consistente visualmente
+  //   totalOriginal += monto;
 
-    const row = `
-      <tr>
-        <td>${diasNombres[i]}</td>
-        <td>${(prop * 100).toFixed(2)}%</td>
-        <td>${formatCurrency(monto)}</td>
-      </tr>`;
-    tbodyOriginal.insertAdjacentHTML("beforeend", row);
-  }
+  //   const row = `
+  //     <tr>
+  //       <td>${diasNombres[i]}</td>
+  //       <td>${(prop * 100).toFixed(2)}%</td>
+  //       <td>${formatCurrency(monto)}</td>
+  //     </tr>`;
+  //   tbodyOriginal.insertAdjacentHTML("beforeend", row);
+  // }
 
   // ---------------------------
   // Tabla "Distribución Ajustada (días restantes)"
@@ -1714,7 +1714,7 @@ function renderizarDistribucionSemanal() {
           <td>${(prop * 100).toFixed(2)}%</td>
           <td>${formatCurrency(monto)}</td>
         </tr>`;
-      tbodyAjustada.insertAdjacentHTML("beforeend", row);
+      // tbodyAjustada.insertAdjacentHTML("beforeend", row);
     }
   } else {
     // ---- Comportamiento anterior (ajuste para la semana completa restante) ----
@@ -1766,9 +1766,133 @@ function renderizarDistribucionSemanal() {
           <td>${(nuevaProp * 100).toFixed(2)}%</td>
           <td>${formatCurrency(monto)}</td>
         </tr>`;
-      tbodyAjustada.insertAdjacentHTML("beforeend", row);
+      // tbodyAjustada.insertAdjacentHTML("beforeend", row);
     });
   }
+
+    // ====== GRÁFICAS DE DISTRIBUCIÓN (original y ajustada) ======
+  try { window.chartDistOriginal?.destroy(); } catch(e){}
+  try { window.chartDistAjustada?.destroy(); } catch(e){}
+
+  const ctxOrig = document.getElementById("grafica-dist-original")?.getContext("2d");
+  const ctxAdj  = document.getElementById("grafica-dist-ajustada")?.getContext("2d");
+
+  if (ctxOrig && ctxAdj) {
+    // --- Datos base ---
+    const conf = cargarLimites();
+    const limiteSemanalActual = conf.semana;   // ya puede ser “liquidez disponible” en última sem fracc
+    const dist = obtenerDistribucionSemanal();
+    const diasNombres = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+
+    // Serie ORIGINAL: 7 días completos
+    const labelsOrig = diasNombres;
+    const valoresOrig = labelsOrig.map((_, i) => (dist[i] || 0) * limiteSemanalActual);
+    const porcentajesOrig = labelsOrig.map((_, i) => (dist[i] || 0) * 100);
+
+    // Detectar última semana fraccionaria y construir serie AJUSTADA desde HOY
+    const hoyISO = getToday();
+    const hoy = crearFechaLocal(hoyISO);
+    const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes);
+    const fin = crearFechaLocal(finPeriodoISO);
+    const diasRestantesPeriodo = Math.floor((fin - hoy) / (1000*60*60*24));
+    const enUltSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
+
+    let labelsAdj = [];
+    let valoresAdj = [];
+    let porcentajesAdj = [];
+
+    if (enUltSemanaFracc) {
+      // Solo días restantes, renormalizados
+      const diasRestantes = [];
+      for (let i = 0; i < diasRestantesPeriodo; i++) {
+        const d = new Date(hoy);
+        d.setDate(d.getDate() + i);
+        diasRestantes.push(d.getDay());
+      }
+      const sumaPesos = diasRestantes.reduce((acc, d) => acc + (dist[d] || 0), 0) || 1;
+      const distEspecial = {};
+      diasRestantes.forEach(d => { distEspecial[d] = (dist[d] || 0) / sumaPesos; });
+
+      labelsAdj = diasRestantes.map(d => diasNombres[d]);
+      valoresAdj = diasRestantes.map(d => (distEspecial[d] || 0) * limiteSemanalActual);
+      porcentajesAdj = diasRestantes.map(d => (distEspecial[d] || 0) * 100);
+    } else {
+      // Semana completa desde el inicio de semana actual (por visibilidad)
+      const inicioSemanaISO = getWeekCustom(hoyISO, conf.inicioSemana);
+      const inicio = crearFechaLocal(inicioSemanaISO).getDay();
+      const orden = [...Array(7)].map((_, i) => (inicio + i) % 7);
+      labelsAdj = orden.map(d => diasNombres[d]);
+      valoresAdj = orden.map(d => (dist[d] || 0) * limiteSemanalActual);
+      porcentajesAdj = orden.map(d => (dist[d] || 0) * 100);
+    }
+
+    // Paleta a juego (café/oscuro)
+    const colorBar = "#4C301F";
+    const colorBarSoft = "rgba(76,48,31,0.65)";
+
+    const makeChart = (ctx, labels, values, percents) => new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Monto",
+          data: values,
+          backgroundColor: colorBarSoft,
+          borderColor: colorBar,
+          borderWidth: 1.2,
+          barThickness: 26
+        }]
+      },
+      options: {
+        animation: { duration: 800 },
+        scales: {
+          x: {
+            ticks: { color: "#ddd" },
+            grid: { display: false }
+          },
+          y: {
+            ticks: {
+              color: "#bbb",
+              callback: v => `$${Number(v).toLocaleString("es-MX", {maximumFractionDigits:0})}`
+            },
+            grid: { color: "rgba(255,255,255,0.05)" },
+            suggestedMax: Math.max(...values) * 1.1 
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => items[0].label,
+              label: (ctx) => {
+                const i = ctx.dataIndex;
+                const monto = ctx.parsed.y;
+                const p = percents[i] ?? null;
+                return `${p?.toFixed(2)}%  —  $${monto.toLocaleString("es-MX",{maximumFractionDigits:2})}`;
+              }
+            }
+          },
+          datalabels: {
+            anchor: "end",
+            align: "end",
+            offset: 4,
+            color: "#fff",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            borderRadius: 6,
+            padding: {x:6, y:3},
+            formatter: (v, ctx) => `$${v.toLocaleString("es-MX", {maximumFractionDigits:0})}`,
+            font: { weight: "bold" },
+            clip: false
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+    window.chartDistOriginal = makeChart(ctxOrig, labelsOrig, valoresOrig, porcentajesOrig);
+    window.chartDistAjustada = makeChart(ctxAdj, labelsAdj, valoresAdj, porcentajesAdj);
+  }
+
 }
 
 function autoExpand(e) {

@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V55.2</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V56</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -95,23 +95,13 @@
 
     <div id="limite-semanal-actual" style="text-align: center; font-size: 0.9em; color: #ccc; margin-bottom: 1em;"></div>
   
-    <!-- Tabla original -->
+    <!-- Distribución original -->
     <h3>Distribución Original</h3>
-    <table id="tabla-distribucion-original">
-      <thead>
-        <tr><th>Día</th><th>Proporción (%)</th><th>Monto</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <canvas id="grafica-dist-original" height="220" style="margin:16px 0;"></canvas>
 
-    <!-- Tabla ajustada -->
+    <!-- Distribución ajustada -->
     <h3 style="margin-top: 2em;">Distribución Ajustada (días restantes)</h3>
-    <table id="tabla-distribucion-ajustada">
-      <thead>
-        <tr><th>Día</th><th>Proporción actualizada</th><th>Monto</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <canvas id="grafica-dist-ajustada" height="220" style="margin:16px 0;"></canvas>
 
     <button type="button" onclick="mostrarEditorDistribucion()">✏️ Editar proporciones</button>
     <button type="button" onclick="cerrrarVistaDistribucionSemanal()">Volver</button>
