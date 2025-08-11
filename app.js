@@ -1631,146 +1631,27 @@ document.getElementById("btn-eliminar-liquidez").addEventListener("click", () =>
 
 
 function renderizarDistribucionSemanal() {
-  const distribucion = obtenerDistribucionSemanal();
   const conf = cargarLimites();
-  const diasNombres = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
   const hoyISO = getToday();
   const hoy = crearFechaLocal(hoyISO);
-  const diaHoy = hoy.getDay();
 
-  // const tbodyOriginal = document.querySelector("#tabla-distribucion-original tbody");
-  // const tbodyAjustada = document.querySelector("#tabla-distribucion-ajustada tbody");
-
-  // tbodyOriginal.innerHTML = "";
-  // tbodyAjustada.innerHTML = "";
-
-  // ---------------------------
-  // Detectar última semana fraccionaria del periodo mensual
-  // ---------------------------
   const finPeriodoISO = getMonthCustom(sumarDias(hoyISO, 32), conf.inicioMes); // [inicio, fin)
   const finPeriodo = crearFechaLocal(finPeriodoISO);
   const msDia = 1000 * 60 * 60 * 24;
-  const diasRestantesPeriodo = Math.floor((finPeriodo - hoy) / msDia); // días enteros restantes (exclusivo del fin)
+  const diasRestantesPeriodo = Math.floor((finPeriodo - hoy) / msDia);
   const enUltimaSemanaFracc = diasRestantesPeriodo > 0 && diasRestantesPeriodo < 7;
 
-  // Si estamos en última semana fraccionaria, mostramos como "límite semanal" la liquidez disponible
-  const limiteSemanalBase = conf.semana;
+  // Límite a mostrar (si es última semana fracc, usamos liquidez disponible)
   const limiteSemanalMostrar = enUltimaSemanaFracc
     ? Math.max(0, calcularLiquidezDisponible())
-    : limiteSemanalBase;
+    : conf.semana;
 
   // Header informativo
-  document.getElementById("limite-semanal-actual").textContent =
-    `Límite semanal actual: ${formatCurrency(limiteSemanalMostrar)}${enUltimaSemanaFracc ? " (última semana del periodo)" : ""}`;
+  const hdr = document.getElementById("limite-semanal-actual");
+  hdr.textContent = `Límite semanal actual: ${formatCurrency(limiteSemanalMostrar)}${enUltimaSemanaFracc ? " (última semana del periodo)" : ""}`;
 
-  // ---------------------------
-  // Tabla "Distribución Original" (siempre con los pesos actuales)
-  // ---------------------------
-  // let totalOriginal = 0;
-  // for (let i = 0; i < 7; i++) {
-  //   const prop = distribucion[i] || 0;
-  //   const monto = prop * limiteSemanalMostrar; // usamos el "mostrar" para que sea consistente visualmente
-  //   totalOriginal += monto;
-
-  //   const row = `
-  //     <tr>
-  //       <td>${diasNombres[i]}</td>
-  //       <td>${(prop * 100).toFixed(2)}%</td>
-  //       <td>${formatCurrency(monto)}</td>
-  //     </tr>`;
-  //   tbodyOriginal.insertAdjacentHTML("beforeend", row);
-  // }
-
-  // ---------------------------
-  // Tabla "Distribución Ajustada (días restantes)"
-  // ---------------------------
-  // --- Distribución Ajustada (última semana fraccionaria) comenzando HOY ---
-  if (enUltimaSemanaFracc) {
-    // Construir distribución especial: ceros fuera del periodo y renormalizar sobre días restantes
-    const distribucionEspecial = { 0:0,1:0,2:0,3:0,4:0,5:0,6:0 };
-    const diasRestantes = [];
-    for (let i = 0; i < diasRestantesPeriodo; i++) {
-      const d = new Date(hoy);
-      d.setDate(d.getDate() + i);
-      diasRestantes.push(d.getDay());
-    }
-    const sumaPesosRestantes = diasRestantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
-    diasRestantes.forEach(d => {
-      distribucionEspecial[d] = (distribucion[d] || 0) / sumaPesosRestantes;
-    });
-
-    // 🔽 Imprimir SOLO los días restantes, en orden desde HOY
-    for (let i = 0; i < diasRestantesPeriodo; i++) {
-      const d = new Date(hoy);
-      d.setDate(d.getDate() + i);
-      const dow = d.getDay();
-      const prop = distribucionEspecial[dow] || 0;
-      const monto = prop * limiteSemanalMostrar;
-
-      const row = `
-        <tr>
-          <td>${diasNombres[dow]}</td>
-          <td>${(prop * 100).toFixed(2)}%</td>
-          <td>${formatCurrency(monto)}</td>
-        </tr>`;
-      // tbodyAjustada.insertAdjacentHTML("beforeend", row);
-    }
-  } else {
-    // ---- Comportamiento anterior (ajuste para la semana completa restante) ----
-    const gastos = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
-
-    // Calcular ventana semanal según inicioSemana
-    const inicioSemanaDate = new Date(hoy);
-    const offset = (hoy.getDay() - conf.inicioSemana + 7) % 7;
-    inicioSemanaDate.setDate(hoy.getDate() - offset);
-    inicioSemanaDate.setHours(0, 0, 0, 0);
-
-    const finSemanaDate = new Date(inicioSemanaDate);
-    finSemanaDate.setDate(finSemanaDate.getDate() + 7);
-
-    const fechaInicioISO = toLocalISODate(inicioSemanaDate);
-    const fechaFinISO = toLocalISODate(finSemanaDate);
-
-    const gastosSemana = gastos.filter(g =>
-      g.timestamp.slice(0, 10) >= fechaInicioISO && g.timestamp.slice(0, 10) < fechaFinISO
-    );
-
-    // Gasto por día de la semana
-    const gastoPorDia = {};
-    gastosSemana.forEach(g => {
-      const f = crearFechaLocal(g.timestamp.slice(0, 10));
-      const d = f.getDay();
-      gastoPorDia[d] = (gastoPorDia[d] || 0) + g.monto;
-    });
-
-    const diasSemana = [...Array(7)].map((_, i) => (inicioSemanaDate.getDay() + i) % 7);
-    const hoyRelativo = (hoy.getDay() - conf.inicioSemana + 7) % 7;
-    const diasFaltantes = diasSemana.slice(hoyRelativo);
-
-    const gastoAcumulado = diasSemana
-      .slice(0, hoyRelativo)
-      .reduce((acc, d) => acc + (gastoPorDia[d] || 0), 0);
-
-    const restante = limiteSemanalMostrar - gastoAcumulado;
-    const sumaProporcionesRestantes = diasFaltantes.reduce((acc, d) => acc + (distribucion[d] || 0), 0) || 1;
-
-    diasFaltantes.forEach(d => {
-      const propRel = (distribucion[d] || 0) / sumaProporcionesRestantes;
-      const monto = propRel * Math.max(0, restante);
-      const nuevaProp = limiteSemanalMostrar > 0 ? (monto / limiteSemanalMostrar) : 0;
-
-      const row = `
-        <tr>
-          <td>${diasNombres[d]}</td>
-          <td>${(nuevaProp * 100).toFixed(2)}%</td>
-          <td>${formatCurrency(monto)}</td>
-        </tr>`;
-      // tbodyAjustada.insertAdjacentHTML("beforeend", row);
-    });
-  }
-
-    // ====== GRÁFICAS DE DISTRIBUCIÓN (original y ajustada) ======
+  // ====== GRÁFICAS DE DISTRIBUCIÓN (original y ajustada) ======
   try { window.chartDistOriginal?.destroy(); } catch(e){}
   try { window.chartDistAjustada?.destroy(); } catch(e){}
 
@@ -1881,7 +1762,11 @@ function renderizarDistribucionSemanal() {
             borderRadius: 6,
             padding: {x:6, y:3},
             formatter: (v, ctx) => `$${v.toLocaleString("es-MX", {maximumFractionDigits:0})}`,
-            font: { weight: "bold" },
+            font: {
+              weight: "bold",
+              size: 10
+            },
+            rotation: -30,
             clip: false
           }
         }
