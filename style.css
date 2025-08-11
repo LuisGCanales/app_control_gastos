@@ -17,7 +17,7 @@ body {
 ======================================== */
 
 .container {
-  width: 75vw;
+  width: 80vw;
   margin: 0em auto;
   padding: 2em;
   background-color: rgba(15, 15, 15, 0.75);
@@ -345,10 +345,6 @@ button:hover {
 ======================================== */
 
 @media screen and (max-width: 480px) {
-  .container {
-    margin: 2em;
-    padding: 1.5em;
-  }
 
   h1, h2 {
     font-size: 1.2em;
