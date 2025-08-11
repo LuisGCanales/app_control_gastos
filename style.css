@@ -448,7 +448,7 @@ button:hover {
 
 @media screen and (orientation: landscape) {
   .container {
-    width: 82vw;
+    width: 100vw;
     margin: 4em auto;
   }
 }
