@@ -448,7 +448,7 @@ button:hover {
 
 @media screen and (orientation: landscape) {
   .container {
-    max-width: 82vw;       /* un poco más ancho que el default */
+    max-width: 95vw;       /* un poco más ancho que el default */
     margin: 0em auto;  /* aire vertical similar a tu diseño anterior */
   }
 }
