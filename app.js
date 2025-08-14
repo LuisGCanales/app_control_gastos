@@ -538,12 +538,12 @@ function exportarCSV() {
   ];
 
   const contenidoCSV = "\uFEFF" + filas.map(f => f.join(",")).join("\n") + "\n";
-  const blob = new Blob([contenidoCSV], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `gastos_${getToday()}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  enqueueDownload({
+    filename: `gastos_${getToday()}.csv`,
+    mime: "text/csv;charset=utf-8;",
+    content: contenidoCSV
+  });
+
 }
 
 function importarCSV(e) {
@@ -976,13 +976,12 @@ function exportarFijosCSV() {
       escaparCampoCSV(g.nota) || ""
     ])
   ];
-
-  const blob = new Blob([filas.map(f => f.join(",")).join("\n")], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `gastos_fijos_${getToday()}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const contenido = [filas.map(f => f.join(",")).join("\n")];
+  enqueueDownload({
+    filename: `gastos_fijos_${getToday()}.csv`,
+    mime: "text/csv;charset=utf-8;",
+    content: contenido
+  });
 }
 
 function importarFijosCSV(e) {
@@ -1859,13 +1858,57 @@ function cerrarModalSobrantes() {
 }
 
 
-function descargarBlob(nombre, contenido, mime = "text/plain;charset=utf-8;") {
-  const blob = new Blob([contenido], { type: mime });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = nombre;
-  a.click();
-  URL.revokeObjectURL(a.href);
+// Cola global de descargas para evitar ráfagas en Android
+const _downloadQueue = [];
+let _downloading = false;
+
+function enqueueDownload({ filename, mime, content }) {
+  _downloadQueue.push({ filename, mime, content });
+  if (!_downloading) processDownloadQueue();
+}
+
+async function processDownloadQueue() {
+  _downloading = true;
+  while (_downloadQueue.length) {
+    const { filename, mime, content } = _downloadQueue.shift();
+    try {
+      await triggerDownload(filename, content, mime);
+      // Pequeño respiro entre descargas para Android/Chrome
+      await new Promise(r => setTimeout(r, 700));
+    } catch (e) {
+      console.error("Fallo al descargar:", filename, e);
+    }
+  }
+  _downloading = false;
+}
+
+function triggerDownload(filename, content, mime = "application/octet-stream") {
+  return new Promise((resolve, reject) => {
+    try {
+      const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      a.style.display = "none";
+      document.body.appendChild(a);
+
+      // Click en el próximo frame para asegurar layout
+      requestAnimationFrame(() => {
+        a.click();
+
+        // Limpieza confiable después de que el sistema tenga tiempo de “enganchar” la descarga
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          resolve();
+        }, 4000); // 4s: margen seguro en Android
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
 function exportarConfigYLiquidezJSON() {
@@ -1879,11 +1922,17 @@ function exportarConfigYLiquidezJSON() {
     fecha_export: fecha,
     limites,
     liquidez,
-    distribucionSemanal  // ← NEW
+    distribucionSemanal
   };
 
   const json = JSON.stringify(payload, null, 2);
-  descargarBlob(`config_liquidez_${fecha}.json`, json, "application/json;charset=utf-8;");
+
+  enqueueDownload({
+    filename: `config_liquidez_${fecha}.json`,
+    mime: "application/json;charset=utf-8;",
+    content: json
+  });
+
 }
 
 function dispararExportacionAutomaticaDiaria() {
