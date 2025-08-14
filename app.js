@@ -527,7 +527,7 @@ function exportarCSV() {
     ["id", "fecha", "monto", "concepto", "medio", "compartido", "fijo", "nota"],
     ...gastos.map(g => [
       g.id || "",
-      g.timestamp.slice(0, 10),
+      g.timestamp.replace("T", " "),
       g.monto,
       escaparCampoCSV(g.concepto),
       g.medio || "",
