@@ -2003,52 +2003,69 @@ let __conflictosPendientes = [];     // [{ id, local: {...}, csv: {...} }, ...]
 let __mostrarSobrantesLuego = [];    // gastos extra locales (ya calculados)
 let __postSobrantesCallback = null;
 
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+
 function mostrarModalConflictos(conflictos) {
   __conflictosPendientes = conflictos || [];
-  // Ocultar todo lo demás
+  // Oculta otras vistas
   document.querySelectorAll("section.container").forEach(s => s.style.display = "none");
 
   const tbody = document.getElementById("tbody-conflictos");
   tbody.innerHTML = "";
 
-  conflictos.forEach(({ id, local, csv }, idx) => {
+  conflictos.forEach(({ id, local, csv }) => {
     const groupName = `pick-${id}`;
 
-    // fila LOCAL (arriba)
+    // Normaliza fechas base 'yyyy-mm-dd'
+    const fechaLocalBase = ((local.fecha || local.timestamp || "").slice(0, 10));
+    const fechaCsvBase   = ((csv.fecha   || csv.timestamp   || "").slice(0, 10));
+
+    // Detección de diferencias por campo
+    const diff = {
+      concepto: (local.concepto || "") !== (csv.concepto || ""),
+      monto: Number(local.monto || 0) !== Number(csv.monto || 0),
+      medio: (local.medio || "") !== (csv.medio || ""),
+      compartido: !!local.compartido !== !!csv.compartido,
+      fijo: !!local.fijo !== !!csv.fijo,
+      fecha: fechaLocalBase !== fechaCsvBase
+    };
+
     const filaLocal = `
       <tr>
         <td class="select-col centrado">
           <input type="radio" name="${groupName}" value="local" aria-label="Conservar local" />
         </td>
-        <td>${local.concepto || "-"}</td>
-        <td>${formatCurrency(local.monto)}</td>
-        <td>${local.medio || "-"}</td>
-        <td class="centrado">${local.compartido ? "ꪜ" : ""}</td>
-        <td class="centrado">${local.fijo ? "ꪜ" : ""}</td>
-        <td>${formatoCortoDDMM(local.timestamp)}</td>
+        <td class="${diff.concepto ? 'diff-rojo' : ''}">${esc(local.concepto || "-")}</td>
+        <td class="${diff.monto ? 'diff-rojo' : ''}">${formatCurrency(local.monto)}</td>
+        <td class="${diff.medio ? 'diff-rojo' : ''}">${esc(local.medio || "-")}</td>
+        <td class="centrado ${diff.compartido ? 'diff-rojo' : ''}">${local.compartido ? "ꪜ" : ""}</td>
+        <td class="centrado ${diff.fijo ? 'diff-rojo' : ''}">${local.fijo ? "ꪜ" : ""}</td>
+        <td class="${diff.fecha ? 'diff-rojo' : ''}">${formatoCortoDDMM(fechaLocalBase)}</td>
       </tr>`;
 
-    // fila CSV (abajo)
     const filaCSV = `
       <tr>
         <td class="select-col centrado">
           <input type="radio" name="${groupName}" value="csv" aria-label="Conservar CSV" />
         </td>
-        <td>${csv.concepto || "-"}</td>
-        <td>${formatCurrency(csv.monto)}</td>
-        <td>${csv.medio || "-"}</td>
-        <td class="centrado">${csv.compartido ? "ꪜ" : ""}</td>
-        <td class="centrado">${csv.fijo ? "ꪜ" : ""}</td>
-        <td>${formatoCortoDDMM(csv.timestamp)}</td>
+        <td class="${diff.concepto ? 'diff-rojo' : ''}">${esc(csv.concepto || "-")}</td>
+        <td class="${diff.monto ? 'diff-rojo' : ''}">${formatCurrency(csv.monto)}</td>
+        <td class="${diff.medio ? 'diff-rojo' : ''}">${esc(csv.medio || "-")}</td>
+        <td class="centrado ${diff.compartido ? 'diff-rojo' : ''}">${csv.compartido ? "ꪜ" : ""}</td>
+        <td class="centrado ${diff.fijo ? 'diff-rojo' : ''}">${csv.fijo ? "ꪜ" : ""}</td>
+        <td class="${diff.fecha ? 'diff-rojo' : ''}">${formatoCortoDDMM(fechaCsvBase)}</td>
       </tr>`;
 
-    // separador grueso entre pares
     const separador = `<tr class="separador-conflicto"><td colspan="7"></td></tr>`;
 
     tbody.insertAdjacentHTML("beforeend", filaLocal + filaCSV + separador);
   });
 
-  // Por conveniencia, preselecciona CSV en todos
+  // Preselecciona CSV por comodidad
   conflictos.forEach(({ id }) => {
     const r = document.querySelector(`input[name="pick-${id}"][value="csv"]`);
     if (r) r.checked = true;

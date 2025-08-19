@@ -704,3 +704,9 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
   width: 6%;
   white-space: nowrap;
 }
+
+/* Campos distintos en conflictos */
+.diff-rojo {
+  color: #ff7070;
+  font-weight: 600;
+}
