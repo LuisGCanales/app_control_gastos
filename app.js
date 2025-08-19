@@ -2075,21 +2075,11 @@ function mostrarModalConflictos(conflictos) {
   history.pushState({ vista: "modal-conflictos" }, "", "#modal-conflictos");
 }
 
-function cerrarModalConflictos(destino = 'principal') {
-  const modal = document.getElementById("modal-conflictos");
-  if (modal) modal.style.display = "none";
+function cerrarModalConflictos() {
+  document.getElementById("modal-conflictos").style.display = "none";
+  document.getElementById("vista-tabla").style.display = "block";
 
-  // Limpia hash del modal
-  if (location.hash === "#modal-conflictos") {
-    history.replaceState({}, "", " ");
-  }
-
-  if (destino === 'tabla') {
-    mostrarTabla();           // tu función existente de navegación a la vista de tabla
-    renderizarTablaGastos();  // asegurar que refleje los cambios
-  } else if (destino === 'principal') {
-    volverAPrincipal();
-  }
+  renderizarTablaGastos();
 }
 
 
@@ -2427,11 +2417,16 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
       return;
     }
 
-    if (visible.id === "tabla-sobrantes") {
+    if (visible.id === "modal-eliminar-sobrantes") {
       cerrarModalSobrantes();
       return;
     }
     
+    if (visible.id === "modal-conflictos") {
+      cerrarModalConflictos();
+      return;
+    }
+
     if (visible.id === "vista-graficas") {
       cerrarVistaGraficas();
       return;
