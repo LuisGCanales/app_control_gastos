@@ -763,3 +763,33 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 #tabla-sobrantes td:nth-child(6) { width: 3%;  text-align: center; } /* C. */
 #tabla-sobrantes th:nth-child(7),
 #tabla-sobrantes td:nth-child(7) { width: 3%;  text-align: center; } /* F. */
+
+/* Texto y espacios más compactos en los dos modales */
+#tabla-conflictos,
+#tabla-sobrantes {
+  font-size: 0.84em;       /* antes ~0.9em; reduce ~7% */
+}
+
+#tabla-conflictos th, #tabla-conflictos td,
+#tabla-sobrantes th,   #tabla-sobrantes td {
+  padding: 0.38em 0.42em;  /* un poco menos de padding */
+  line-height: 1.15;       /* compacta renglones sin pegar demasiado */
+}
+
+/* Números alineados uniforme (mejora legibilidad de montos/fechas) */
+#tabla-conflictos td:nth-child(3),
+#tabla-conflictos td:nth-child(7),
+#tabla-sobrantes  td:nth-child(2),
+#tabla-sobrantes  td:nth-child(4) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* En pantallas pequeñas, compacta un poco más */
+@media (max-width: 420px) {
+  #tabla-conflictos, #tabla-sobrantes { font-size: 0.78em; }
+  #tabla-conflictos th, #tabla-conflictos td,
+  #tabla-sobrantes th,   #tabla-sobrantes td {
+    padding: 0.34em 0.36em;
+    line-height: 1.12;
+  }
+}
