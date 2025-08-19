@@ -736,17 +736,17 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 #tabla-conflictos th:nth-child(1),
 #tabla-conflictos td:nth-child(1) { width: 6%;  text-align: center; }
 #tabla-conflictos th:nth-child(2),
-#tabla-conflictos td:nth-child(2) { width: 44%; } /* Concepto grande */
+#tabla-conflictos td:nth-child(2) { width: 40%; } /* Concepto grande */
 #tabla-conflictos th:nth-child(3),
-#tabla-conflictos td:nth-child(3) { width: 18%; } /* Monto */
+#tabla-conflictos td:nth-child(3) { width: 22%; } /* Monto */
 #tabla-conflictos th:nth-child(4),
-#tabla-conflictos td:nth-child(4) { width: 16%; } /* Medio */
+#tabla-conflictos td:nth-child(4) { width: 14%; } /* Medio */
 #tabla-conflictos th:nth-child(5),
-#tabla-conflictos td:nth-child(5) { width: 6%;  text-align: center; } /* C. */
+#tabla-conflictos td:nth-child(5) { width: 3%;  text-align: center; } /* C. */
 #tabla-conflictos th:nth-child(6),
-#tabla-conflictos td:nth-child(6) { width: 4%;  text-align: center; } /* F. */
+#tabla-conflictos td:nth-child(6) { width: 3%;  text-align: center; } /* F. */
 #tabla-conflictos th:nth-child(7),
-#tabla-conflictos td:nth-child(7) { width: 6%; } /* Fecha */
+#tabla-conflictos td:nth-child(7) { width: 12%; } /* Fecha */
 
 /* Sobrantes: [check][fecha][concepto][monto][medio][C][F] */
 #tabla-sobrantes th:nth-child(1),
