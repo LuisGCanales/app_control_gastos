@@ -710,3 +710,71 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
   color: #ff7070;
   font-weight: 600;
 }
+
+
+/* Los modales nunca deben forzar zoom: limitamos tamaño y hacemos scroll interno */
+#modal-conflictos,
+#modal-eliminar-sobrantes {
+  width: min(92vw, 1000px);   /* igual o más angosto que .container */
+  max-height: 88vh;           /* que no rebase la pantalla */
+  overflow-y: auto;           /* scroll vertical si hace falta */
+  overflow-x: hidden;         /* bloquea desborde horizontal */
+}
+
+/* Que se comporten como la tabla de gastos generales */
+#tabla-conflictos, #tabla-sobrantes {
+  table-layout: fixed;   /* columnas fijas para que no “empujen” el ancho */
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+#tabla-conflictos th, #tabla-conflictos td,
+#tabla-sobrantes th,   #tabla-sobrantes td {
+  padding: 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: left;
+  overflow-wrap: anywhere;  /* rompe palabras largas */
+  word-break: break-word;
+}
+
+/* Distribución de columnas — CONFLICTOS: [radio][concepto][monto][medio][C][F][fecha] */
+#tabla-conflictos th:nth-child(1),
+#tabla-conflictos td:nth-child(1) { width: 6%;  white-space: nowrap; text-align: center; }
+#tabla-conflictos th:nth-child(2),
+#tabla-conflictos td:nth-child(2) { width: 44%; }   /* Concepto grande */
+#tabla-conflictos th:nth-child(3),
+#tabla-conflictos td:nth-child(3) { width: 18%; }   /* Monto */
+#tabla-conflictos th:nth-child(4),
+#tabla-conflictos td:nth-child(4) { width: 16%; }   /* Medio */
+#tabla-conflictos th:nth-child(5),
+#tabla-conflictos td:nth-child(5) { width: 6%;  text-align: center; } /* C. */
+#tabla-conflictos th:nth-child(6),
+#tabla-conflictos td:nth-child(6) { width: 4%;  text-align: center; } /* F. */
+#tabla-conflictos th:nth-child(7),
+#tabla-conflictos td:nth-child(7) { width: 6%;  white-space: nowrap; } /* Fecha */
+
+/* Distribución de columnas — SOBRANTES: [check][fecha][concepto][monto][medio][C][F] */
+#tabla-sobrantes th:nth-child(1),
+#tabla-sobrantes td:nth-child(1) { width: 6%;  white-space: nowrap; text-align: center; } /* check */
+#tabla-sobrantes th:nth-child(2),
+#tabla-sobrantes td:nth-child(2) { width: 10%; white-space: nowrap; }  /* Fecha */
+#tabla-sobrantes th:nth-child(3),
+#tabla-sobrantes td:nth-child(3) { width: 48%; }  /* Concepto */
+#tabla-sobrantes th:nth-child(4),
+#tabla-sobrantes td:nth-child(4) { width: 18%; }  /* Monto */
+#tabla-sobrantes th:nth-child(5),
+#tabla-sobrantes td:nth-child(5) { width: 12%; }  /* Medio */
+#tabla-sobrantes th:nth-child(6),
+#tabla-sobrantes td:nth-child(6) { width: 3%;  text-align: center; }   /* C. */
+#tabla-sobrantes th:nth-child(7),
+#tabla-sobrantes td:nth-child(7) { width: 3%;  text-align: center; }   /* F. */
+
+/* En móviles, ajusta tipografías/padding para no forzar ancho */
+@media (max-width: 420px) {
+  #tabla-conflictos th, #tabla-conflictos td,
+  #tabla-sobrantes th,   #tabla-sobrantes td {
+    padding: 0.4em 0.35em;
+    font-size: 0.9em;
+  }
+}
