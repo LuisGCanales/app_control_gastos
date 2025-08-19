@@ -767,7 +767,7 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 /* Texto y espacios más compactos en los dos modales */
 #tabla-conflictos,
 #tabla-sobrantes {
-  font-size: 0.84em;       /* antes ~0.9em; reduce ~7% */
+  font-size: 0.75em;       /* antes ~0.9em; reduce ~7% */
 }
 
 #tabla-conflictos th, #tabla-conflictos td,
@@ -792,4 +792,9 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
     padding: 0.34em 0.36em;
     line-height: 1.12;
   }
+}
+
+#tabla-conflictos input[type="radio"] {
+  transform: scale(0.8);   /* 80% del tamaño normal */
+  cursor: pointer;
 }
