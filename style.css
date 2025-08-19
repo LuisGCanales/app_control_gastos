@@ -752,13 +752,13 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 #tabla-sobrantes th:nth-child(1),
 #tabla-sobrantes td:nth-child(1) { width: 6%;  text-align: center; } /* check */
 #tabla-sobrantes th:nth-child(2),
-#tabla-sobrantes td:nth-child(2) { width: 10%; } /* Fecha */
+#tabla-sobrantes td:nth-child(2) { width: 18%; } /* Fecha */
 #tabla-sobrantes th:nth-child(3),
-#tabla-sobrantes td:nth-child(3) { width: 48%; } /* Concepto */
+#tabla-sobrantes td:nth-child(3) { width: 34%; } /* Concepto */
 #tabla-sobrantes th:nth-child(4),
-#tabla-sobrantes td:nth-child(4) { width: 18%; } /* Monto */
+#tabla-sobrantes td:nth-child(4) { width: 22%; } /* Monto */
 #tabla-sobrantes th:nth-child(5),
-#tabla-sobrantes td:nth-child(5) { width: 12%; } /* Medio */
+#tabla-sobrantes td:nth-child(5) { width: 14%; } /* Medio */
 #tabla-sobrantes th:nth-child(6),
 #tabla-sobrantes td:nth-child(6) { width: 3%;  text-align: center; } /* C. */
 #tabla-sobrantes th:nth-child(7),

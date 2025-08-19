@@ -1843,7 +1843,7 @@ function mostrarModalSobrantes(gastos) {
     const fila = `
       <tr>
         <td><input type="checkbox" class="check-sobrante" data-id="${g.id}" checked></td>
-        <td>${fecha}</td>
+        <td>${formatoCortoDDMM(fecha)}</td>
         <td>${g.concepto}</td>
         <td>${formatCurrency(g.monto)}</td>
         <td>${g.medio || "-"}</td>
