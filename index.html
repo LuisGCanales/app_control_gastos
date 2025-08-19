@@ -15,7 +15,7 @@
 
   <!-- === Vista Principal === -->
   <main class="container" id="vista-principal">
-    <h1>Control de Gastos<sup class="supscript">V57.3</sup></h1>
+    <h1>Control de Gastos<sup class="supscript">V58</sup></h1>
 
     <!-- Formulario de nuevo gasto -->
     <form id="gasto-form" autocomplete="off">
@@ -401,6 +401,31 @@
     </form>
   </section>
 
+  <!-- Modal de conflictos al importar -->
+  <section class="container" id="modal-conflictos" style="display: none;">
+    <h2>Conflictos al importar</h2>
+    <form id="form-conflictos">
+      <table id="tabla-conflictos" style="width: 100%; border-collapse: collapse; margin-top: 1em;">
+        <thead>
+          <tr>
+            <th style="width: 6%"></th>     <!-- radios -->
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Medio</th>
+            <th>C.</th>
+            <th>F.</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-conflictos"></tbody>
+      </table>
+
+      <div class="acciones-modal" style="display: flex; gap: 0.75em; margin-top: 1em; justify-content: space-between;">
+        <button type="submit">Agregar gastos</button>
+        <button type="button" onclick="cerrarModalConflictos('tabla')">Cancelar</button>
+      </div>
+    </form>
+  </section>
 
   <!-- Scripts -->
   <script src="app.js"></script>

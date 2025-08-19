@@ -685,3 +685,22 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
 #vista-tabla {
   overflow-x: auto;
 }
+
+/* Separador entre pares de conflictos */
+.separador-conflicto td {
+  border-top: 3px solid rgba(255, 255, 255, 0.35);
+}
+
+#tabla-conflictos th, #tabla-conflictos td {
+  padding: 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: left;
+}
+
+#tabla-conflictos td.centrado { text-align: center; }
+
+/* Columna de radios más angosta en la tabla de conflictos */
+#tabla-conflictos td.select-col, #tabla-conflictos th:first-child {
+  width: 6%;
+  white-space: nowrap;
+}

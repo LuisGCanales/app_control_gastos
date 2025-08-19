@@ -598,25 +598,35 @@ function importarCSV(e) {
 
     const gastosActuales = JSON.parse(localStorage.getItem("gastos")) || [];
     const idsLocales = new Set(gastosActuales.map(g => g.id));
+    const mapaLocal = new Map(gastosActuales.map(g => [g.id, g]));
+
     const gastosExtraLocales = gastosActuales.filter(g => !idsEnCSV.has(g.id));
     const gastosNuevos = nuevos.filter(g => !idsLocales.has(g.id));
+
+    // Detectar conflictos (mismo ID en ambos, con diferencias)
+    const conflictos = nuevos
+      .filter(g => idsLocales.has(g.id))
+      .map(csvG => ({ id: csvG.id, local: mapaLocal.get(csvG.id), csv: csvG }))
+      .filter(par => !gastosIguales(par.local, par.csv));
 
     const actualizados = [...gastosActuales];
     const liquidez = obtenerLiquidez();
 
+    // 1) Agregar nuevos (descontando liquidez)
     for (const gasto of gastosNuevos) {
       actualizados.push(gasto);
-
-      // Actualizar liquidez
       const i = liquidez.findIndex(l => l.categoria === gasto.medio);
-      if (i !== -1) {
-        liquidez[i].monto -= gasto.monto;
-      }
+      if (i !== -1) liquidez[i].monto -= gasto.monto;
     }
 
     localStorage.setItem("gastos", JSON.stringify(actualizados));
+    guardarLiquidez(liquidez);
 
-    if (gastosExtraLocales.length > 0) {
+    // 2) Mostrar conflictos (si hay). Los sobrantes se muestran DESPUÉS de resolver conflictos.
+    if (conflictos.length > 0) {
+      __mostrarSobrantesLuego = gastosExtraLocales; // los lanzamos cuando cierre conflictos
+      mostrarModalConflictos(conflictos);
+    } else if (gastosExtraLocales.length > 0) {
       mostrarModalSobrantes(gastosExtraLocales);
     }
 
@@ -1724,6 +1734,9 @@ function renderizarDistribucionSemanal() {
         }]
       },
       options: {
+        responsive: true,
+        // maintainAspectRatio: true,
+        devicePixelRatio: window.devicePixelRatio, 
         animation: { duration: 800 },
         scales: {
           x: {
@@ -1855,6 +1868,10 @@ function mostrarModalSobrantes(gastos) {
 function cerrarModalSobrantes() {
   document.getElementById("modal-eliminar-sobrantes").style.display = "none";
   document.getElementById("vista-tabla").style.display = "block";
+
+  if (typeof __postSobrantesCallback === "function") {
+  __postSobrantesCallback();
+  }
 }
 
 
@@ -1954,6 +1971,107 @@ function dispararExportacionAutomaticaDiaria() {
     console.log(`✅ Exportación automática completada (${hoy})`);
   } catch (e) {
     console.error("❌ Error en exportación automática:", e);
+  }
+}
+
+
+function formatoCortoDDMM(fechaStr) {
+  if (typeof fechaStr !== "string") return "";
+  // Acepta exactamente 'yyyy-mm-dd' o cadenas que inicien así (p. ej. 'yyyy-mm-ddT...')
+  const m = fechaStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return "";
+  const dd = m[3], mm = m[2];
+  return `${dd}/${mm}`;
+}
+
+function gastosIguales(a, b) {
+  if (!a || !b) return false;
+  // Comparación estricta campo a campo relevantes para ti
+  return (
+    a.id === b.id &&
+    a.timestamp === b.timestamp &&
+    Number(a.monto) === Number(b.monto) &&
+    (a.concepto || "") === (b.concepto || "") &&
+    (a.medio || "") === (b.medio || "") &&
+    !!a.compartido === !!b.compartido &&
+    !!a.fijo === !!b.fijo &&
+    (a.nota || "") === (b.nota || "")
+  );
+}
+
+let __conflictosPendientes = [];     // [{ id, local: {...}, csv: {...} }, ...]
+let __mostrarSobrantesLuego = [];    // gastos extra locales (ya calculados)
+let __postSobrantesCallback = null;
+
+function mostrarModalConflictos(conflictos) {
+  __conflictosPendientes = conflictos || [];
+  // Ocultar todo lo demás
+  document.querySelectorAll("section.container").forEach(s => s.style.display = "none");
+
+  const tbody = document.getElementById("tbody-conflictos");
+  tbody.innerHTML = "";
+
+  conflictos.forEach(({ id, local, csv }, idx) => {
+    const groupName = `pick-${id}`;
+
+    // fila LOCAL (arriba)
+    const filaLocal = `
+      <tr>
+        <td class="select-col centrado">
+          <input type="radio" name="${groupName}" value="local" aria-label="Conservar local" />
+        </td>
+        <td>${local.concepto || "-"}</td>
+        <td>${formatCurrency(local.monto)}</td>
+        <td>${local.medio || "-"}</td>
+        <td class="centrado">${local.compartido ? "ꪜ" : ""}</td>
+        <td class="centrado">${local.fijo ? "ꪜ" : ""}</td>
+        <td>${formatoCortoDDMM(local.timestamp)}</td>
+      </tr>`;
+
+    // fila CSV (abajo)
+    const filaCSV = `
+      <tr>
+        <td class="select-col centrado">
+          <input type="radio" name="${groupName}" value="csv" aria-label="Conservar CSV" />
+        </td>
+        <td>${csv.concepto || "-"}</td>
+        <td>${formatCurrency(csv.monto)}</td>
+        <td>${csv.medio || "-"}</td>
+        <td class="centrado">${csv.compartido ? "ꪜ" : ""}</td>
+        <td class="centrado">${csv.fijo ? "ꪜ" : ""}</td>
+        <td>${formatoCortoDDMM(csv.timestamp)}</td>
+      </tr>`;
+
+    // separador grueso entre pares
+    const separador = `<tr class="separador-conflicto"><td colspan="7"></td></tr>`;
+
+    tbody.insertAdjacentHTML("beforeend", filaLocal + filaCSV + separador);
+  });
+
+  // Por conveniencia, preselecciona CSV en todos
+  conflictos.forEach(({ id }) => {
+    const r = document.querySelector(`input[name="pick-${id}"][value="csv"]`);
+    if (r) r.checked = true;
+  });
+
+  document.getElementById("modal-conflictos").style.display = "block";
+  history.pushState({ vista: "modal-conflictos" }, "", "#modal-conflictos");
+}
+
+function cerrarModalConflictos(destino = 'principal') {
+  const modal = document.getElementById("modal-conflictos");
+  if (modal) modal.style.display = "none";
+
+  // Limpia hash del modal
+  if (location.hash === "#modal-conflictos") {
+    history.replaceState({}, "", " ");
+  }
+
+  if (destino === 'tabla') {
+    mostrarTabla();           // tu función existente de navegación a la vista de tabla
+    renderizarTablaGastos();  // asegurar que refleje los cambios
+  } else if (destino === 'principal') {
+    volverAPrincipal();
   }
 }
 
@@ -2480,4 +2598,104 @@ document.getElementById("btn-posponer-fijo").addEventListener("click", () => {
   });
 
   dispararExportacionAutomaticaDiaria();
+
+  document.getElementById("form-conflictos").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    if (!Array.isArray(__conflictosPendientes) || __conflictosPendientes.length === 0) {
+      // Sin conflictos: ir a tabla y renderizar
+      mostrarTabla();
+      renderizarTablaGastos();
+      return;
+    }
+
+    // Carga estado actual
+    let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+    const liquidez = obtenerLiquidez();
+    const indexById = new Map(gastos.map((g, i) => [g.id, i]));
+
+    // Resolver cada conflicto según selección (local/csv)
+    __conflictosPendientes.forEach(({ id, local, csv }) => {
+      const picked = (document.querySelector(`input[name="pick-${id}"]:checked`) || {}).value;
+      if (picked !== "csv") return; // si eligen "local", no se modifica
+
+      const idx = indexById.get(id);
+      if (idx == null) return;
+
+      const viejo = gastos[idx];
+      const nuevo = csv;
+
+      // Ajuste de liquidez
+      if ((viejo.medio || "") !== (nuevo.medio || "")) {
+        // Reintegra al medio anterior
+        const iOld = liquidez.findIndex(l => l.categoria === (viejo.medio || ""));
+        if (iOld !== -1) liquidez[iOld].monto += Number(viejo.monto) || 0;
+
+        // Descuenta del nuevo medio
+        const iNew = liquidez.findIndex(l => l.categoria === (nuevo.medio || ""));
+        if (iNew !== -1) liquidez[iNew].monto -= Number(nuevo.monto) || 0;
+      } else {
+        // Mismo medio: aplica solo delta
+        const delta = (Number(nuevo.monto) || 0) - (Number(viejo.monto) || 0);
+        const i = liquidez.findIndex(l => l.categoria === (nuevo.medio || ""));
+        if (i !== -1) liquidez[i].monto -= delta;
+      }
+
+      // Sustituye el registro
+      gastos[idx] = nuevo;
+    });
+
+    // Persistir cambios
+    localStorage.setItem("gastos", JSON.stringify(gastos));
+    guardarLiquidez(liquidez);
+
+    // Recalcular límite diario si aplica (conserva tu lógica existente)
+    try {
+      if (getToday && localStorage.getItem("limites_dia_aplicado") === getToday()) {
+        const conf = JSON.parse(localStorage.getItem("limites") || "null");
+        if (conf) {
+          const todosVars = (JSON.parse(localStorage.getItem("gastos")) || []).filter(g => !g.fijo);
+          const nuevoLimite = calcularLimiteDinamicoDiario({
+            gastos: todosVars,
+            limiteSemanal: conf.semana,
+            distribucion: obtenerDistribucionSemanal(),
+            inicioSemana: conf.inicioSemana
+          });
+          conf.dia = Math.max(0, Math.round(nuevoLimite));
+          localStorage.setItem("limites", JSON.stringify(conf));
+        }
+      }
+    } catch (err) {
+      console.warn("Recalc límites omitido:", err);
+    }
+
+    // Cierra SOLO el modal de conflictos (sin pasar por principal)
+    const modal = document.getElementById("modal-conflictos");
+    if (modal) modal.style.display = "none";
+    if (location.hash === "#modal-conflictos") {
+      history.replaceState({}, "", " ");
+    }
+
+    // Si hay sobrantes pendientes, abre directamente ese modal y,
+    // al cerrarlo, regresa a la tabla y re-renderiza.
+    if (Array.isArray(__mostrarSobrantesLuego) && __mostrarSobrantesLuego.length > 0) {
+      const copia = __mostrarSobrantesLuego.slice();
+      __mostrarSobrantesLuego = [];
+
+      __postSobrantesCallback = () => {
+        mostrarTabla();
+        renderizarTablaGastos();
+        __postSobrantesCallback = null;
+      };
+
+      mostrarModalSobrantes(copia);
+      return;
+    }
+
+    // Si no hay sobrantes, ir a la tabla y re-renderizar
+    mostrarTabla();
+    renderizarTablaGastos();
+  });
+
+
 });
