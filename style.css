@@ -798,3 +798,8 @@ box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.08);
   transform: scale(0.8);   /* 80% del tamaño normal */
   cursor: pointer;
 }
+
+#tabla-sobrantes input[type="checkbox"] {
+  transform: scale(0.8);   /* 80% del tamaño normal */
+  cursor: pointer;
+}
