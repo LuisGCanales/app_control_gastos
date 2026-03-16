@@ -1,35 +1,61 @@
-function getToday() {
-  return new Date().toISOString().slice(0,10)
+// === UTILIDADES GENERALES ===
+
+// A partir de una ISO string crea un objeto date en zona horaria local
+function crearFechaLocal(isoDateStr) {
+  const [año, mes, dia] = isoDateStr.split("-").map(Number);
+  return new Date(año, mes - 1, dia); // Este sí es local, sin UTC
 }
+// Función auxiliar para transformar un objeto date a formato YYYY-MM-DD
+const toLocalISODate = date => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+// Fecha actual en formato YYYY-MM-DD
+const getToday = () => {
+  const d = new Date();
+  return toLocalISODate(d);
+};
+
+// Fecha y hora local sin conversión UTC
+const obtenerFechaHoraLocal = () => {
+  const now = new Date();
+  const [a, m, d, h, min] = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+    String(now.getHours()).padStart(2, "0"),
+    String(now.getMinutes()).padStart(2, "0")
+  ];
+  return `${a}-${m}-${d}T${h}:${min}:00`;
+};
+
+// Sumar días a una fecha ISO
+const sumarDias = (fechaStr, dias) => {
+  const d = new crearFechaLocal(fechaStr);
+  d.setDate(d.getDate() + dias);
+  return toLocalISODate(d);
+};
 
 function format(n){
   return Math.round(n).toLocaleString()
 }
 
-function getInicioSemana(){
+// Fecha de inicio de semana personalizada
+const getInicioSemana = (fecha, inicio) => {
+  const d = new crearFechaLocal(fecha);
+  const diff = (d.getDay() - inicio + 7) % 7;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return toLocalISODate(d);
+};
 
-  const inicio = localStorage.getItem("inicioSemana")
+function getFinSemana(inicioSemana){
 
-  if(!inicio){
-    const hoy = getToday()
-    localStorage.setItem("inicioSemana", hoy)
-    return new Date(hoy)
-  }
-
-  return new Date(inicio)
-
-}
-
-function getFinSemana(){
-
-  const inicio = getInicioSemana()
-
-  const fin = new Date(inicio)
-
-  fin.setDate(fin.getDate()+6)
-
+  const fin = sumarDias(inicioSemana, 6);
   return fin
-
 }
 
 function cargarMediosPago(){
@@ -58,10 +84,10 @@ function calcularGastoDia(){
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || []
 
-  const hoy = getToday()
+  const hoy = getToday();
 
   return gastos
-  .filter(g => g.timestamp.slice(0,10) === hoy)
+  .filter(g => !g.fijo && g.timestamp.slice(0,10) === hoy)
   .reduce((a,b)=>a+b.monto,0)
 
 }
@@ -70,15 +96,17 @@ function calcularGastoSemana(){
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || []
 
-  const inicio = getInicioSemana()
+  const conf = JSON.parse(localStorage.getItem("limites")) || predet;
+  
+  const inicio = getInicioSemana(getToday(), conf.inicioSemana || 0)
 
-  const fin = getFinSemana()
+  const fin = getFinSemana(inicio)
 
   return gastos.filter(g => {
 
-    const fecha = new Date(g.timestamp)
+    const fecha = g.timestamp.slice(0,10)
 
-    return fecha >= inicio && fecha <= fin
+    return !g.fijo && fecha >= inicio && fecha <= fin
 
   })
   .reduce((a,b)=>a+b.monto,0)
@@ -129,7 +157,7 @@ function generarID(){
 
 }
 
-function registrarGasto(monto,concepto,medio){
+function registrarGasto(monto,concepto,medio,nota){
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || []
 
@@ -138,19 +166,13 @@ function registrarGasto(monto,concepto,medio){
   const gasto = {
 
     id: generarID(),
-
     monto,
-
     concepto,
-
     medio,
-
+    compartido:false,
     fijo:false,
-
-    nota:"",
-
-    timestamp: new Date().toISOString()
-
+    timestamp: obtenerFechaHoraLocal(),
+    nota: nota || ""
   }
 
   gastos.push(gasto)
@@ -173,16 +195,21 @@ document.getElementById("gasto-form").addEventListener("submit", e => {
 
   const monto = parseFloat(document.getElementById("monto").value)
 
-  const concepto = document.getElementById("concepto").value
+  const concepto = document.getElementById("concepto").value.trim()
 
   const medio = document.getElementById("medio-pago").value
 
-  if(!monto) return
+  const nota = document.getElementById("nota-gasto").value.trim()
 
-  registrarGasto(monto,concepto,medio)
+  if(!monto) return
+  if(!concepto) return
+
+  registrarGasto(monto,concepto,medio,nota)
 
   e.target.reset()
 
+  document.getElementById("nota-gasto").value = ""
+  
   actualizarResumen()
 
 })
