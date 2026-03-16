@@ -2,7 +2,7 @@
   "name": "Control de Gastos",
   "short_name": "Gastos",
   "start_url": "./index.html",
-  "display": "fullscreen",
+  "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "any",
@@ -28,7 +28,8 @@
       "icons": [
         {
           "src": "icons/icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "purpose": "any maskable"
         }
       ]
     },
@@ -40,7 +41,8 @@
       "icons": [
         {
           "src": "icons/icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "purpose": "any maskable"
         }
       ]
     }
