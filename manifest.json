@@ -24,7 +24,7 @@
       "name": "Registrar gasto",
       "short_name": "Gasto rápido",
       "description": "Abrir versión rápida",
-      "url": "/lite.html",
+      "url": "./lite.html",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -36,7 +36,7 @@
       "name": "Abrir app completa",
       "short_name": "App",
       "description": "Abrir panel completo",
-      "url": "/index.html",
+      "url": "./index.html",
       "icons": [
         {
           "src": "icons/icon-192.png",
