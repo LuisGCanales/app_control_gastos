@@ -1,0 +1,74 @@
+body{
+  font-family: system-ui, -apple-system, sans-serif;
+  text-align:center;
+}
+
+/* ---------- BLOQUES RESUMEN ---------- */
+
+main{
+  min-height:100dvh;
+  background-color: rgba(15, 15, 15, 0.95);
+}
+.resumen{
+  margin-bottom:30px;
+}
+
+.numero{
+  font-weight:700;
+}
+
+.gastado{
+  color:#444;
+}
+
+/* .restante{
+  color:#d22;
+} */
+
+/* diario grande */
+
+#diario .numero{
+  font-size:56px;
+}
+
+/* semanal mediano */
+
+#semanal .numero{
+  font-size:32px;
+}
+
+/* ---------- FORMULARIO ---------- */
+
+form{
+  margin-top:20px;
+}
+
+input, select, textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
+  font-size:16px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  background:rgba(151, 17, 17, 0.385);
+  color:white;
+  font-size:18px;
+}
+
+.btn-completa{
+  display:block;
+  margin-top:20px;
+  padding:12px;
+  border-radius:8px;
+  text-decoration:none;
+  background:#18181877;
+  color:rgba(255, 255, 255, 0.768);
+  font-size:16px;
+}

@@ -80,9 +80,7 @@ function cargarMediosPago(){
 
 }
 
-function calcularGastoDia(){
-
-  const gastos = JSON.parse(localStorage.getItem("gastos")) || []
+function calcularGastoDia(gastos){
 
   const hoy = getToday();
 
@@ -92,13 +90,9 @@ function calcularGastoDia(){
 
 }
 
-function calcularGastoSemana(){
-
-  const gastos = JSON.parse(localStorage.getItem("gastos")) || []
-
-  const conf = JSON.parse(localStorage.getItem("limites")) || predet;
+function calcularGastoSemana(gastos, limites){
   
-  const inicio = getInicioSemana(getToday(), conf.inicioSemana || 0)
+  const inicio = getInicioSemana(getToday(), limites.inicioSemana || 0)
 
   const fin = getFinSemana(inicio)
 
@@ -127,9 +121,11 @@ function actualizarResumen(){
 
   const limites = JSON.parse(localStorage.getItem("limites")) || {}
 
-  const gastoDia = calcularGastoDia()
+  const gastos = JSON.parse(localStorage.getItem("gastos")) || []
 
-  const gastoSemana = calcularGastoSemana()
+  const gastoDia = calcularGastoDia(gastos)
+
+  const gastoSemana = calcularGastoSemana(gastos, limites)
 
   const restanteDia = (limites.dia || 0) - gastoDia
 
