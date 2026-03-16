@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
+
+  <title>Gastos Lite</title>
+
+  <style>
+
+  body{
+    font-family: system-ui, -apple-system, sans-serif;
+    text-align:center;
+  }
+
+  /* ---------- BLOQUES RESUMEN ---------- */
+
+  main{
+    min-height:100dvh;
+    background-color: rgba(15, 15, 15, 0.95);
+  }
+  .resumen{
+    margin-bottom:30px;
+  }
+
+  .numero{
+    font-weight:700;
+  }
+
+  .gastado{
+    color:#444;
+  }
+
+  .restante{
+    color:#d22;
+  }
+
+  /* diario grande */
+
+  #diario .numero{
+    font-size:56px;
+  }
+
+  /* semanal mediano */
+
+  #semanal .numero{
+    font-size:32px;
+  }
+
+  /* ---------- FORMULARIO ---------- */
+
+  form{
+    margin-top:20px;
+  }
+
+  input, select{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:8px;
+    border:none;
+    font-size:16px;
+  }
+
+  button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:rgba(221, 34, 34, 0.742);
+    color:white;
+    font-size:18px;
+  }
+
+  .btn-completa{
+    display:block;
+    margin-top:20px;
+    padding:12px;
+    border-radius:8px;
+    text-decoration:none;
+    background:#18181877;
+    color:rgba(255, 255, 255, 0.768);
+    font-size:16px;
+  }
+  </style>
+</head>
+
+
+<body>
+
+<!-- DIARIO -->
+<main class="container" id="lite">
+
+<h1>Control de Gastos<sup class="supscript">V59</sup></h1>
+
+<br>
+
+<div id="diario" class="resumen">
+  <div>Hoy</div>
+
+  <div class="numero">
+    <span id="dia-gastado" class="gastado">0</span>
+    /
+    <span id="dia-restante" class="restante">0</span>
+  </div>
+</div>
+
+
+<!-- SEMANAL -->
+
+<div id="semanal" class="resumen">
+  <div>Semana</div>
+
+  <div class="numero">
+    <span id="sem-gastado" class="gastado">0</span>
+    /
+    <span id="sem-restante" class="restante">0</span>
+  </div>
+</div>
+
+
+<!-- FORMULARIO RÁPIDO -->
+
+<form id="gasto-form">
+
+<input
+type="number"
+inputmode="decimal"
+pattern="[0-9]*"
+id="monto"
+placeholder="Monto"
+step="0.01"
+required
+>
+
+<input
+  type="text"
+  id="concepto"
+  placeholder="Concepto"
+>
+
+<select id="medio-pago"></select>
+
+<button type="submit">
+  Registrar gasto
+</button>
+
+</form>
+
+<a href="index.html" class="btn-completa">
+  Full version
+</a>
+
+<script src="lite.js"></script>
+</main>
+</body>
+</html>

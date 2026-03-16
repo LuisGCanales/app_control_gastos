@@ -18,5 +18,19 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar gasto",
+      "short_name": "Gasto rápido",
+      "description": "Abrir versión rápida para registrar gasto",
+      "url": "./lite.html",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
