@@ -5,7 +5,7 @@
   "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "any",
+  "orientation": "portrait",
   "description": "App ligera para registrar y monitorear tus gastos diarios, semanales y mensuales.",
   "icons": [
     {
