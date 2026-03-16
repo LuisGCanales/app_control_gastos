@@ -85,6 +85,16 @@ function calcularGastoSemana(){
 
 }
 
+function colorDisponible(el, valor){
+
+  if(valor >= 0){
+    el.style.color = "#32ad13"   // verde
+  } else {
+    el.style.color = "#d22"      // rojo
+  }
+
+}
+
 function actualizarResumen(){
 
   const limites = JSON.parse(localStorage.getItem("limites")) || {}
@@ -93,17 +103,23 @@ function actualizarResumen(){
 
   const gastoSemana = calcularGastoSemana()
 
-  const restanteDia = Math.max(0, (limites.dia || 0) - gastoDia)
+  const restanteDia = (limites.dia || 0) - gastoDia
 
-  const restanteSemana = Math.max(0, (limites.semana || 0) - gastoSemana)
+  const restanteSemana = (limites.semana || 0) - gastoSemana
+
+  const elDiaRestante = document.getElementById("dia-restante")
+  const elSemRestante = document.getElementById("sem-restante")
 
   document.getElementById("dia-gastado").textContent = format(gastoDia)
 
-  document.getElementById("dia-restante").textContent = format(restanteDia)
+  elDiaRestante.textContent = format(restanteDia)
+  elSemRestante.textContent = format(restanteSemana)
+
+  colorDisponible(elDiaRestante, restanteDia)
+  colorDisponible(elSemRestante, restanteSemana)
 
   document.getElementById("sem-gastado").textContent = format(gastoSemana)
 
-  document.getElementById("sem-restante").textContent = format(restanteSemana)
 
 }
 
