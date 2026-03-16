@@ -207,8 +207,6 @@ document.getElementById("gasto-form").addEventListener("submit", e => {
   registrarGasto(monto,concepto,medio,nota)
 
   e.target.reset()
-
-  document.getElementById("nota-gasto").value = ""
   
   actualizarResumen()
 
