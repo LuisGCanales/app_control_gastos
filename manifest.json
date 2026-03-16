@@ -1,8 +1,8 @@
 {
   "name": "Control de Gastos",
   "short_name": "Gastos",
-  "start_url": "./index.html",
-  "display": "standalone",
+  "start_url": "./lite.html?source=pwa",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "any",
@@ -17,34 +17,6 @@
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Registrar gasto",
-      "short_name": "Gasto rápido",
-      "description": "Abrir versión rápida",
-      "url": "./lite.html",
-      "icons": [
-        {
-          "src": "icons/icon-192.png",
-          "sizes": "192x192",
-          "purpose": "any maskable"
-        }
-      ]
-    },
-    {
-      "name": "Abrir app completa",
-      "short_name": "App",
-      "description": "Abrir panel completo",
-      "url": "./index.html",
-      "icons": [
-        {
-          "src": "icons/icon-192.png",
-          "sizes": "192x192",
-          "purpose": "any maskable"
-        }
-      ]
     }
   ]
 }
