@@ -147,6 +147,15 @@ function actualizarResumen(){
 
 }
 
+function obtenerLiquidez() {
+  return JSON.parse(localStorage.getItem("liquidez")) || [];
+}
+
+function guardarLiquidez(arr) {
+  localStorage.setItem("liquidez", JSON.stringify(arr));
+}
+
+
 function generarID(){
 
   return crypto.randomUUID()
@@ -157,7 +166,7 @@ function registrarGasto(monto,concepto,medio,nota){
 
   const gastos = JSON.parse(localStorage.getItem("gastos")) || []
 
-  const liquidez = JSON.parse(localStorage.getItem("liquidez")) || {}
+  const liquidez = obtenerLiquidez()
 
   const gasto = {
 
@@ -175,12 +184,10 @@ function registrarGasto(monto,concepto,medio,nota){
 
   localStorage.setItem("gastos", JSON.stringify(gastos))
 
-  if(liquidez[medio] !== undefined){
-
-    liquidez[medio] -= monto
-
-    localStorage.setItem("liquidez", JSON.stringify(liquidez))
-
+  const idx = liquidez.findIndex(item => item.categoria === medio);
+  if (idx !== -1) {
+    liquidez[idx].monto -= monto;
+    guardarLiquidez(liquidez);
   }
 
 }
